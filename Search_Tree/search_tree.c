@@ -1,4 +1,5 @@
 
+//搜索二叉树的基本操作
 #include"search_tree.h"
 #include<stdio.h>
 #include<stdlib.h>
