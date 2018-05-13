@@ -16,7 +16,7 @@ typedef struct SearchTreeNode
 //初始化二叉搜索树
 void SearchTreeInit(SearchTreeNode** proot);
 
-//在二叉搜索树中插入元素
+//在二叉搜索树中插入元素（递归）
 void SearchTreeInsert(SearchTreeNode** proot,SearchTreeType value);
 
 //在二叉搜索树中查找指定元素
@@ -24,3 +24,10 @@ SearchTreeNode* SearchTreeFind(SearchTreeNode* root,SearchTreeType to_find);
 
 //在二叉搜索树中删除指定元素
 void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove);
+
+//在二叉搜索树中插入指定元素（非递归）
+void SearchTreeInsertByLoop(SearchTreeNode** proot,SearchTreeType value);
+
+//在二叉搜索树中查找指定元素（非递归）
+SearchTreeNode* SearchTreeFindByLoop(SearchTreeNode* root,SearchTreeType to_find);
+

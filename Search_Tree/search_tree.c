@@ -240,6 +240,96 @@ void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove)
     DestroyNode(remove_pos);
     return;
 }
+//在二叉搜索树中插入指定元素（非递归）
+void SearchTreeInsertByLoop(SearchTreeNode** proot,SearchTreeType value)
+{
+    if(proot == NULL)
+    {
+        //非法输入
+        return;
+    }
+    //创建新节点
+    SearchTreeNode* new_node = CreateNode(value);
+    //如果根节点为空，直接使根节点的指针指向新节点
+    if(*proot == NULL)
+    {
+        *proot = new_node;
+        return;
+    }
+    //从根节点开始循环遍历寻找新节点要插入的节点，该节点的左右子树必须至少有一个为空，
+    //且与新节点的大小关系满足搜索二叉树的定义
+    //在插入新节点时，要一层一层的往下遍历直到找到可以插入的节点
+    SearchTreeNode* cur = *proot;
+    while(1)
+    {
+        //如果某个节点的左子树为空，且value的值小于该节点的值
+        //将新节点作为该节点的左子树
+        if(cur->lchild == NULL && value < cur->data)
+        {
+            cur->lchild = new_node;
+            break;
+        }
+        //如果某个节点的右子树为空，且value的值大于该节点的值
+        //将新节点作为该节点的右子树
+        if(cur->rchild == NULL && value > cur->data)
+        {
+            cur->rchild = new_node;
+            break;
+        }
+        //如果某个节点的左子树不为空,且value的值小于该节点的值
+        //则在该节点的左子树中继续循环遍历查找
+        if(value < cur->data)
+        {
+            cur = cur->lchild;
+        }
+        //如果某个节点的右子树不为空，且value的值大于该节点的值
+        //则在该节点的右子树中继续循环遍历查找
+        else if(value > cur->data)
+        {
+            cur = cur->rchild;
+        }
+        //如果遇到与某个节点的值相等，则直接结束，不进行插入
+        else
+        {
+            break;
+        }
+    }
+    return;
+}
+//在二叉搜索树中查找指定元素（非递归）
+SearchTreeNode* SearchTreeFindByLoop(SearchTreeNode* root,SearchTreeType to_find)
+{
+    if(root == NULL)
+    {
+        //空树
+        return NULL;
+    }
+    //从根节点开始遍历查找，待找到某个节点
+    SearchTreeNode* cur = root;
+    while(1)
+    {   
+        //如果遍历到某个节点时，该节点为空，则说明要查找的值不存在
+        if(cur == NULL)
+        {
+            break;
+        }
+        //如果要查找节点的值小于根节点的值，则在左子树中循环遍历查找
+        if(to_find < cur->data)
+        {
+            cur = cur->lchild;
+        }
+        //rug要查找节点的值大于根节点的值，则在该节点的右子树中继续循环遍历查找
+        else if(to_find > cur->data)
+        {
+            cur = cur->rchild;
+        }
+        else
+        {
+            return cur;
+        }
+    }
+    return NULL;
+}
 //////////////////////////
 //测试代码
 //////////////////////////
@@ -303,12 +393,13 @@ void TestInsert()
 
     SearchTreeNode* root;
     SearchTreeInit(&root);
-    SearchTreeInsert(&root,'a');
+    SearchTreeInsert(&root,'a');//测试在空树中插入节点
     SearchTreeInsert(&root,'b');
     SearchTreeInsert(&root,'c');
     SearchTreeInsert(&root,'f');
     SearchTreeInsert(&root,'d');
     SearchTreeInsert(&root,'e');
+    SearchTreeInsert(&root,'e');//测试插入已有的值
 
     SearchTreePrint(root,"打印搜索二叉树的先序和中序遍历");
     return;
@@ -375,11 +466,62 @@ void TestRemove()
     SearchTreePrint(root,"删除跟节点d");
 }
 
+//测试非递归插入
+void TestInsertByLoop()
+{
+    TEST_HANDLE;
+    
+    SearchTreeInsertByLoop(NULL,'a');//测试非法输入
+
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+    SearchTreeInsertByLoop(&root,'a');//测试在空树中插入节点
+    SearchTreeInsertByLoop(&root,'b');
+    SearchTreeInsertByLoop(&root,'c');
+    SearchTreeInsertByLoop(&root,'f');
+    SearchTreeInsertByLoop(&root,'d');
+    SearchTreeInsertByLoop(&root,'e');
+    SearchTreeInsertByLoop(&root,'e');//测试插入已有的值
+
+    SearchTreePrint(root,"打印搜索二叉树的先序和中序遍历");
+    return;
+
+}
+
+//测试非递归查找
+void TestFindByLoop()
+{
+    TEST_HANDLE;
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+
+    SearchTreeNode* to_find;
+    to_find = SearchTreeFindByLoop(root,'a');//测试在空树中查找
+    printf("expect null,actually %p\n",to_find);
+
+    SearchTreeInsertByLoop(&root,'a');
+    SearchTreeInsertByLoop(&root,'b');
+    SearchTreeInsertByLoop(&root,'c');
+    SearchTreeInsertByLoop(&root,'f');
+    SearchTreeInsertByLoop(&root,'d');
+    SearchTreeInsertByLoop(&root,'e');
+
+    to_find = SearchTreeFindByLoop(root,'a');//测试在非空树中查找存在的元素
+    printf("expect %p,actually %p\n",root,to_find);
+    printf("expect a,actually %c\n",to_find->data);
+
+    to_find = SearchTreeFindByLoop(root,'g');//测试在非空树中查找不存在的元素
+    printf("expect null,actually %p\n",to_find);
+
+}
+
 int main()
 {
     TestInit();
     TestInsert();
     TestFind();
     TestRemove();
+    TestInsertByLoop();
+    TestFindByLoop();
     return 0;
 }
