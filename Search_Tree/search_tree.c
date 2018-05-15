@@ -129,42 +129,42 @@ void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove)
         return;
     }
     //1. 首先查找要删除元素和其父节点所在的位置
-    SearchTreeNode* cur = *proot;
+    SearchTreeNode* to_remove_node = *proot;
     SearchTreeNode* pre = NULL;
     while(1)
     {
-        if(cur == NULL)
+        if(to_remove_node == NULL)
         {
             //2. 如果找不到，则删除失败
             //此时说明没有找到要删除的节点，说明删除失败，直接返回即可
             return;
         }
-        if(cur->data == to_remove)
+        if(to_remove_node->data == to_remove)
         {
-            break;//此时cur即为要删除的节点
+            break;//此时to_remove_node即为要删除的节点
         }
-        else if(to_remove < cur->data)
+        else if(to_remove < to_remove_node->data)
         {
-            //说明要删除的节点可能在cur的左子树中
-            pre = cur;
-            cur = cur->lchild;
+            //说明要删除的节点可能在to_remove_node的左子树中
+            pre = to_remove_node;
+            to_remove_node = to_remove_node->lchild;
         }
         else
         {
-            //说明要删除的节点可能在cur的右子树中
-            pre = cur;
-            cur = cur->rchild;
+            //说明要删除的节点可能在to_remove_node的右子树中
+            pre = to_remove_node;
+            to_remove_node = to_remove_node->rchild;
         }
     }
 
-    //走到这里，说明cur就是要删除节点的指针
+    //走到这里，说明to_remove_node就是要删除节点的指针
     //3. 如果找到了该节点，可分为以下几种情形讨论
 
     //  a）该节点没有左右子树
-    if(cur->lchild == NULL && cur->rchild == NULL)
+    if(to_remove_node->lchild == NULL && to_remove_node->rchild == NULL)
     {
         //      i）如果该节点是根节点，则直接将根节点置空即可
-        if(cur == *proot)
+        if(to_remove_node == *proot)
         {
             *proot = NULL;
         }
@@ -172,78 +172,78 @@ void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove)
         else 
         {
             //          如果要删除的节点是其父节点的右子树，则将父节点的右子树置为空
-            if(cur == pre->rchild)
+            if(to_remove_node == pre->rchild)
             {
                 pre->rchild = NULL;
             }
             //          如果要删除节点是其父节点的左子树，则将父节点的左子树置为空
-            else if(cur == pre->lchild)
+            else if(to_remove_node == pre->lchild)
             {
                 pre->lchild = NULL;
             }
         }
         //      最后将该节点释放即可
-        DestroyNode(cur);
+        DestroyNode(to_remove_node);
     }
 
     //  b）该节点只有左子树
-    else if(cur->lchild != NULL && cur->rchild == NULL)
+    else if(to_remove_node->lchild != NULL && to_remove_node->rchild == NULL)
     {
         //      i）如果要删除的节点是跟节点，则将跟节点的左子树作为新的根节点
-        if(cur == *proot)
+        if(to_remove_node == *proot)
         {
-            *proot = cur->lchild;
+            *proot = to_remove_node->lchild;
         }
         //      ii）如果要删除的元素不是父节点
         else
         {
             //          如果要删除的元素是其父节点的左子树，则将要删除的节点的左子树作为其父节点的左子树
-            if(cur == pre->lchild)
+            if(to_remove_node == pre->lchild)
             {
-                pre->lchild = cur->lchild;
+                pre->lchild = to_remove_node->lchild;
             }
             //          如果要删除节点是其父节点的右子树，则将要删除节点的左子树作为其父节点的右子树
-            else if(cur == pre->rchild)
+            else if(to_remove_node == pre->rchild)
             {
-                pre->rchild = cur->lchild;
+                pre->rchild = to_remove_node->lchild;
             }
         }
         //      最后，释放该节点
-        DestroyNode(cur);
+        DestroyNode(to_remove_node);
     }
 
     //  c）该节点只有右子树
-    else if(cur->lchild == NULL && cur->rchild != NULL)
+    else if(to_remove_node->lchild == NULL && to_remove_node->rchild != NULL)
     {
         //      i）如果要删除的节点是根节点，则将要删除节点的右子树作为新的根节点
-        if(cur == *proot)
+        if(to_remove_node == *proot)
         {
-            *proot = cur->rchild;
+            *proot = to_remove_node->rchild;
         }
         //      ii）如果要删除节点不是根节点
         else
         {
             //          如果要删除节点是其父节点的左子树，则将要删除节点的右子树作为其父节点的左子树
-            if(cur == pre->lchild)
+            if(to_remove_node == pre->lchild)
             {
-                pre->lchild = cur->rchild;
+                pre->lchild = to_remove_node->rchild;
             }
             //          如果要删除节点是其父节点的右子树，则将要删除节点的右子树作为其父节点的右子树
-            else if(cur == pre->rchild)
+            else if(to_remove_node == pre->rchild)
             {
-                pre->rchild = cur->rchild;
+                pre->rchild = to_remove_node->rchild;
             }
         }
         //      最后释放要删除节点
-        DestroyNode(cur);
+        DestroyNode(to_remove_node);
     }
 
     //  d）该节点有左右节点
     else
     {
         //      先在要删除节点的右子树中找到最小值，同时记录最小值的父节点
-        SearchTreeNode* min = cur->rchild;
-        SearchTreeNode* min_pre = cur;
+        SearchTreeNode* min = to_remove_node->rchild;
+        SearchTreeNode* min_pre = to_remove_node;
         while(min->lchild != NULL)
         {
             min_pre = min;
@@ -251,12 +251,12 @@ void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove)
         }
         //此时，min即为要删除元素右子树中的最小值
         //      然后将最小值赋值给要删除节点的值，则现在要删除的就是最小值节点了
-        cur->data = min->data;
+        to_remove_node->data = min->data;
         //  i)如果最小值是要删除节点的右子树，则最小值的父节点一定是要删除的节点则该右子树一定没有左子树，
-        if(min == cur->rchild)
+        if(min == to_remove_node->rchild)
         {
             //         因此将最小值的右子树赋值给要删除节点的右子树
-            cur->rchild = min->rchild;
+            to_remove_node->rchild = min->rchild;
         }
         //      ii）如果最小值不是要删除节点的右子树，则该最小值一定也没有左子树
         else
