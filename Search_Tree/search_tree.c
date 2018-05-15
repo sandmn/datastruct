@@ -114,9 +114,119 @@ SearchTreeNode* Parent(SearchTreeNode* root,SearchTreeNode* child)
 
 }
 
-//在二叉搜索树中删除指定元素
-//
+//在二叉搜索树中删除指定元素（递归）
 void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove)
+{
+    if(proot == NULL)
+    {
+        //非法输入
+        return;
+    }
+    if(*proot == NULL)
+    {
+        //空树，删除失败
+        //该语句还表示，如果最后最后遍历到空的根节点，说明没有找到要删除的节点，此时也是删除失败
+        return;
+    }
+    //接下来在左右子树中遍历查找要删除元素所在的位置
+    
+    SearchTreeNode* root = *proot;
+
+    //如果要删除元素小于根节点，则在左子树中递归遍历查找
+    if(to_remove < root->data)
+    {
+        SearchTreeRemove(&root->lchild,to_remove);  
+    }
+    else if(to_remove > root->data)//如果要删除元素大于根节点的值，则在右子树中递归遍历查找
+    {
+        SearchTreeRemove(&root->rchild,to_remove);
+    }
+    else//此时说明找到了要删除的节点了
+    {
+        //此时root便是要删除的节点，根据要删除节点的状态可分为如下四种情况讨论
+        //1. 如果要删除的节点没有左右子树
+        if(root->lchild == NULL && root->rchild == NULL)
+        {
+            //此时直接将该处的节点指针置为空，并释放内存即可
+            //该处的指针为root，要改变root的指向，即改变root的值
+            //此时就需要通过二级指针来改变指针的指向
+            //在该层递归函数中，如果直接改变行参root的值，并不会真正改变实际内存中的值，
+            //所以要是用二级指针来找到真正的内存空间，再将其内容置为空即可
+            //这里不用区分要删除的节点是其父节点的左子树还是右子树
+            //因为父节点就是通过指针的指针来找到它的该孩子节点所在的位置
+            //然后在对其进行判断其左右子树是否为空的，所以直接通过二级指针来改变该节点处的值即可
+            *proot = NULL;
+            DestroyNode(root);
+        }
+        //2. 如果要删除的节点只有左子树
+        else if(root->lchild != NULL && root->rchild == NULL)
+        {
+            //将要删除节点的左子树放在要删除节点的位置，再将要删除的节点释放即可
+            //*proot相当于要删除节点指针所存放的内存空间
+            //root相当于该空间中存放的值
+            //所以如果要删除的元素为父节点的左子树，只需将该空间中的值替换为要删除节点的左子树的指针
+            //然后释放要删除节点的值即可
+            //如果要删除元素为父节点的左子树，也就是说*proot中存放的就是父节点左子树的值
+            *proot = root->lchild;//*proot 作右值时表示的是值的大小，作左值时表示的是空间的大小
+            DestroyNode(root);
+        }
+        //3. 如果要删除的节点只有右子树
+        else if(root->lchild == NULL && root->rchild != NULL)
+        {
+            *proot = root->rchild;
+            DestroyNode(root);
+        }
+        //4. 如果要删除的节点左右子树都有
+        else
+        {
+            //此时，需要现在要删除节点的右子树中找到到最小值，将最小值赋值给要删除节点的数据域
+            //然后再递归删除最小值即可
+            SearchTreeNode* min = root->rchild;
+            while(min->lchild != NULL)
+            {
+                min = min->lchild;
+            }
+            //当循环结束时，说明min即为要删除元素右子树中的最小值
+            root->data = min->data;
+            SearchTreeRemove(&root->rchild,min->data);
+            //SearchTreeRemove(&min,min->data);
+        }
+    }
+    return;
+    //2. 如果找不到，则删除失败
+    //3. 如果找到了该节点，可分为以下几种情形讨论
+    //  a）该节点没有左右子树
+    //      i）如果该节点是根节点，则直接将根节点置空即可
+    //      ii)如果该节点不是根节点，那么该节点就是叶子节点
+    //          如果要删除的节点是其父节点的右子树，则将父节点的右子树置为空
+    //          如果要删除节点是其父节点的左子树，则将父节点的左子树置为空
+    //      最后将该节点释放即可
+    //  b）该节点只有左子树
+    //      i）如果要删除的节点是父节点，则将父节点的左子树作为新的根节点
+    //      ii）如果要删除的元素不是父节点
+    //          如果要删除的元素是其父节点的左子树，则将要删除的节点的左子树作为其父节点的左子树
+    //          如果要删除节点是其父节点的右子树，则将要删除节点的左子树作为其父节点的右子树
+    //      最后，释放该节点
+    //  c）该节点只有右子树
+    //      i）如果要删除的节点是根节点，则删除节点的右子树作为新的根节点
+    //      ii）如果要删除节点不是根节点
+    //          如果要删除节点是其父节点的左子树，则将要删除节点的右子树作为其父节点的左子树
+    //          如果要删除节点是其父节点的右子树，则将要删除节点的右子树作为其父节点的右子树
+    //      最后释放要删除节点
+    //  d）该节点有左右节点
+    //      先在要删除节点的右子树中找到最小值，同时记录最小值的父节点
+    //      然后将最小值赋值给要删除节点的值，则现在要删除的就是最小值节点了
+    //      i）如果要最小值是要删除节点的右子树，则该右子树一定没有左子树，
+    //         因此将最小值的右子树赋值给要删除节点的右子树
+    //      ii）如果最小值不是要删除节点的右子树，则该最小值一定也没有左子树
+    //          则将最小值的右子树赋值给最小值父节点的左子树
+    //          
+    //
+
+
+}
+//在二叉搜索树中删除指定元素(非递归)
+void SearchTreeRemoveByLoop(SearchTreeNode** proot,SearchTreeType to_remove)
 {
     if(proot == NULL)
     {
@@ -620,8 +730,100 @@ void TestFind()
     return;
 }
 
-//测试删除元素
 void TestRemoveByLoop()
+{
+    TEST_HANDLE;
+
+    SearchTreeRemoveByLoop(NULL,'a');//测试非法输入
+
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+
+    SearchTreeRemoveByLoop(&root,'a');//测试删除空树
+
+    SearchTreeInsert(&root,'a');
+    SearchTreeRemoveByLoop(&root,'a');//测试a)i)
+    SearchTreePrint(root,"删除只有一个根节点a的情况");
+
+    SearchTreeInsert(&root,'b');
+    SearchTreeInsert(&root,'a');
+    SearchTreeInsert(&root,'c');
+    SearchTreeRemoveByLoop(&root,'a');//测试a)ii)1
+    SearchTreePrint(root,"删除节点a的情况");
+
+    SearchTreeInsert(&root,'a');
+    SearchTreeRemoveByLoop(&root,'c');//测试a)ii)2
+    SearchTreePrint(root,"删除节点c的情况");
+
+    SearchTreeRemoveByLoop(&root,'b');//测试b)i)
+    SearchTreePrint(root,"删除节点b的情况");
+
+    SearchTreeRemoveByLoop(&root,'a');
+    SearchTreeInsert(&root,'c');
+    SearchTreeInsert(&root,'b');
+    SearchTreeInsert(&root,'a');
+    SearchTreeRemoveByLoop(&root,'b');//测试删除b)ii)1
+    SearchTreePrint(root,"删除节点b的情况");
+    
+    SearchTreeRemoveByLoop(&root,'a');
+    SearchTreeRemoveByLoop(&root,'c');
+    SearchTreeInsert(&root,'c');
+    SearchTreeInsert(&root,'e');
+    SearchTreeInsert(&root,'d');
+    SearchTreeRemoveByLoop(&root,'e');//测试b)ii)2
+    SearchTreePrint(root,"删除节点e的情况");
+
+    SearchTreeRemoveByLoop(&root,'c');
+    SearchTreeRemoveByLoop(&root,'d');
+    SearchTreeInsert(&root,'a');
+    SearchTreeInsert(&root,'b');
+    SearchTreeRemoveByLoop(&root,'a');//测试c)i)
+    SearchTreePrint(root,"删除节点a的情况");
+    
+    SearchTreeRemoveByLoop(&root,'b');
+    SearchTreeInsert(&root,'d');
+    SearchTreeInsert(&root,'b');
+    SearchTreeInsert(&root,'c');
+    SearchTreeRemoveByLoop(&root,'b');//测试c)ii)1
+    SearchTreePrint(root,"删除节点b的情况");
+    
+    SearchTreeRemoveByLoop(&root,'d');
+    SearchTreeRemoveByLoop(&root,'c');
+    SearchTreeInsert(&root,'a');
+    SearchTreeInsert(&root,'b');
+    SearchTreeInsert(&root,'c');
+    SearchTreeRemoveByLoop(&root,'b');//测试c)ii)2
+    SearchTreePrint(root,"删除节点b的情况");
+
+    SearchTreeRemoveByLoop(&root,'a');
+    SearchTreeRemoveByLoop(&root,'c');
+    SearchTreeInsert(&root,'g');
+    SearchTreeInsert(&root,'d');
+    SearchTreeInsert(&root,'c');
+    SearchTreeInsert(&root,'e');
+    SearchTreeInsert(&root,'f');
+    SearchTreeRemoveByLoop(&root,'d');//测试d)i)
+    SearchTreePrint(root,"删除节点d的情况");
+
+    SearchTreeRemoveByLoop(&root,'g');
+    SearchTreeRemoveByLoop(&root,'c');
+    SearchTreeRemoveByLoop(&root,'e');
+    SearchTreeRemoveByLoop(&root,'f');
+    SearchTreeInsert(&root,'g');
+    SearchTreeInsert(&root,'c');
+    SearchTreeInsert(&root,'b');
+    SearchTreeInsert(&root,'e');
+    SearchTreeInsert(&root,'d');
+    SearchTreeInsert(&root,'f');
+    SearchTreeRemoveByLoop(&root,'c');//测试d)ii)
+    SearchTreePrint(root,"删除节点c的情况");
+    
+
+    SearchTreeRemoveByLoop(&root,'o');
+    SearchTreePrint(root,"删除不存在的节点o");
+}
+//测试删除元素
+void TestRemove()
 {
     TEST_HANDLE;
 
@@ -768,6 +970,7 @@ int main()
     TestInit();
     TestInsert();
     TestFind();
+    TestRemove();
     TestRemoveByLoop();
     TestInsertByLoop();
     TestFindByLoop();
