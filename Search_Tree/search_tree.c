@@ -626,6 +626,36 @@ SearchTreeNode* SearchTreeFindByLoop(SearchTreeNode* root,SearchTreeType to_find
     }
     return NULL;
 }
+//给定一个数组，查找某个数字是否在数组中
+int SearchNumInArray(SearchTreeType array[],size_t size,SearchTreeType to_find)
+{
+    if(array == NULL || size < 0)
+    {
+        //非法输入，查找失败
+        return 0;
+    }
+    //1. 首先根据数组元素建立一个二叉搜索树
+    SearchTreeNode* root;
+    SearchTreeInit(&root);//初始化二叉搜索树
+
+    int index = 0;
+    for(;index < size;++index)
+    {
+        SearchTreeInsert(&root,array[index]);
+    }
+    //2. 然后在该二叉搜索树中查找指定值
+    SearchTreeNode* to_find_node = SearchTreeFind(root,to_find);
+    //3. 如果找到，返回1
+    if(to_find_node == NULL)
+    {
+        return 0;
+    }
+    //4. 如果没找到，返回0
+    else
+    {
+        return 1;
+    }
+}
 //////////////////////////
 //测试代码
 //////////////////////////
@@ -965,6 +995,28 @@ void TestFindByLoop()
 
 }
 
+//测试根据一棵二叉搜索树在树组中查找元素
+void TestFindInArray()
+{
+    TEST_HANDLE;
+    SearchTreeType array[] = {'s','d','f','y','e'};
+    
+    int ret;
+
+    ret = SearchNumInArray(NULL,0,'f');//测试非法输入
+    printf("expect 0,actually %d\n",ret);
+
+    size_t size = sizeof(array)/sizeof(array[0]);
+    ret = SearchNumInArray(array,size,'e');//测试数组中存在的元素
+    printf("expect 1,actually %d\n",ret);
+
+    ret = SearchNumInArray(array,size,'t');//测试数组中不存在的元素
+    printf("expect 0,actually %d\n",ret);
+
+    return;
+
+}
+
 int main()
 {
     TestInit();
@@ -974,5 +1026,6 @@ int main()
     TestRemoveByLoop();
     TestInsertByLoop();
     TestFindByLoop();
+    TestFindInArray();
     return 0;
 }

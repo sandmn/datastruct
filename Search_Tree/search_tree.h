@@ -1,4 +1,5 @@
 #pragma once
+#include<stddef.h>
 
 
 //二叉搜索树是一个二叉树，它还满足：
@@ -22,7 +23,10 @@ void SearchTreeInsert(SearchTreeNode** proot,SearchTreeType value);
 //在二叉搜索树中查找指定元素
 SearchTreeNode* SearchTreeFind(SearchTreeNode* root,SearchTreeType to_find);
 
-//在二叉搜索树中删除指定元素
+//在二叉搜索树中删除指定元素（递归）
+void SearchTreeRemove(SearchTreeNode** proot,SearchTreeType to_remove);
+
+//在二叉搜索树中删除指定元素（非递归）
 void SearchTreeRemoveByLoop(SearchTreeNode** proot,SearchTreeType to_remove);
 
 //在二叉搜索树中插入指定元素（非递归）
@@ -31,3 +35,5 @@ void SearchTreeInsertByLoop(SearchTreeNode** proot,SearchTreeType value);
 //在二叉搜索树中查找指定元素（非递归）
 SearchTreeNode* SearchTreeFindByLoop(SearchTreeNode* root,SearchTreeType to_find);
 
+//给定一个数组，查找某个数字是否在数组中
+int SearchNumInArray(SearchTreeType array[],size_t size,SearchTreeType to_find);
