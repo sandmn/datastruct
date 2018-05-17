@@ -1,6 +1,7 @@
 #include "search_tree_key_value.h"
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 
 //初始化
 void SearchTreeInit(SearchTreeNode** proot)
@@ -14,6 +15,111 @@ void SearchTreeInit(SearchTreeNode** proot)
     return;
 }
 
+//对中英文字典进行操作
+SearchTreeNode* CreateNode(SearchTreeKeyType* key,SearchTreeValueType* value)
+{
+    SearchTreeNode* new_node = (SearchTreeNode*)malloc(sizeof(SearchTreeNode));
+    strcpy(new_node->key,key);
+    strcpy(new_node->value,value);
+    new_node->lchild = NULL;
+    new_node->rchild = NULL;
+    return new_node;
+}
+
+
+//构造插入一棵中英文对照字典树
+void TrieInsert(SearchTreeNode** proot,SearchTreeKeyType* key,SearchTreeValueType* value)
+{
+    if(proot == NULL || key == NULL || value == NULL)
+    {
+        //非法输入
+        return;
+    }
+
+    SearchTreeNode* new_node = CreateNode(key,value);
+    if(*proot == NULL)
+    {
+        //空树
+        *proot = new_node;
+        return;
+    }
+    SearchTreeNode* cur = *proot;
+    while(1)
+    {
+        if(strcmp(key,cur->key) < 0 && cur->lchild == NULL)
+        {
+            cur->lchild = new_node;
+            return;
+        }
+        if(strcmp(key,cur->key) > 0 && cur->rchild == NULL)
+        {
+            cur->rchild = new_node;
+            return;
+        }
+        if(strcmp(key,cur->key) < 0)
+        {
+            cur = cur->lchild;
+        }
+        else if(strcmp(key,cur->key) > 0)
+        {
+            cur = cur->rchild;
+        }
+        else
+        {
+            free(new_node);
+            return;
+        }
+    }
+}
+
+//////////////////////////
+//测试代码
+///////////////////////////
+
+#include<stdio.h>
+#define TEST_HANDLE printf("=================%s===================\n",__FUNCTION__);
+
+void PrintTrie(SearchTreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return;
+    }
+    PrintTrie(root->lchild);
+    printf("%s:%s\n",root->key,root->value);
+    PrintTrie(root->rchild);
+    return;
+}
+
+//测试中英文插入
+void TestTrieInsert()
+{
+    TEST_HANDLE;
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+
+    TrieInsert(&root,"hello","你好"); 
+    TrieInsert(&root,"world","世界"); 
+    TrieInsert(&root,"beauty","美女"); 
+    TrieInsert(&root,"kindness","善良"); 
+    TrieInsert(&root,"cute","可爱"); 
+    TrieInsert(&root,"china","中国"); 
+
+    PrintTrie(root);
+    printf("\n");
+    return;
+}
+
+int main()
+{
+    TestTrieInsert();
+    return 0;
+}
+
+
+//对数组元素进行操作
+#if 0
 SearchTreeNode* CreateNode(SearchTreeKeyType key)
 {
     SearchTreeNode* new_node = (SearchTreeNode*)malloc(sizeof(SearchTreeNode));
@@ -150,3 +256,5 @@ int main()
     TestGetCount();
     return 0;
 }
+
+#endif
