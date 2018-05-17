@@ -3,7 +3,7 @@
 #pragma once
 
 #include<stddef.h>
-//二叉树中各节点的数据类型定义
+////二叉树中各节点的数据类型定义
 typedef char TreeType;
 
 //二叉树中各节点的结构定义
@@ -72,3 +72,15 @@ void TreeInOrderByLoop(TreeNode* root);
 
 //非递归实现树的后序遍历
 void TreePostOrderByLoop(TreeNode* root);
+
+//求一棵树的镜像(递归)
+void TreeMirror(TreeNode* root);
+
+//非递归求一棵树的镜像
+void TreeMirrorByLoop(TreeNode* root);
+
+//判断一棵树是否为完全二叉树
+int IsComplete(TreeNode* root);
+
+//利用先序和中序遍历结果还原一棵二叉树
+TreeNode* TreeRebuild(TreeType pre_order[],TreeType in_order[],size_t size);

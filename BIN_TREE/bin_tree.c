@@ -1,10 +1,11 @@
-
+//二叉树
 #include "bin_tree.h"
 #include"seqqueue.h"
 #include"seqstack.h"
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
+#include<assert.h>
 
 
 
@@ -613,7 +614,8 @@ void TreePostOrderByLoop(TreeNode* root)
             return;
         }
         //5. 若栈顶元素不为空
-        //  1）如果栈顶元素的右孩子为空，
+        //  1）如果栈顶元素的右孩子为空或栈顶元素的右孩子与上一个访问的元素相同，
+        //     则访问栈顶元素，并出栈，然后继续回到3取栈顶元素进行判断
         if(top->rchild == NULL || top->rchild == pre)
         {
             printf("%c ",top->data);
@@ -621,7 +623,7 @@ void TreePostOrderByLoop(TreeNode* root)
             SeqStackPop(&stack);
 
         }
-        //  3） 如果不为4.5，则不做处理，使cur指向cur的右孩子
+        //  2） 如果不为1)，则不做处理，使cur指向cur的右孩子
         else{
             cur = top->rchild;
         }
@@ -631,7 +633,438 @@ void TreePostOrderByLoop(TreeNode* root)
     return;
 }
 
-/////////////////////////////////////
+//求一棵树的镜像
+
+void Swap(TreeNode** a,TreeNode** b)
+{
+    TreeNode* tmp;
+    tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void TreeMirror(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return;
+    }
+
+    //先序遍历树的各节点，访问到一个节点，将该节点的左右孩子交换
+    //此时，访问操作为交换
+    Swap(&root->lchild,&root->rchild);
+    TreeMirror(root->lchild);
+    TreeMirror(root->rchild);
+    return;
+}
+//非递归求一棵树的镜像:将树的三种非递归遍历中的打印操作改为交换操作即可
+//这里采用层序遍历来实现非递归求镜像
+void TreeMirrorByLoop(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return;
+    }
+
+    SeqQueue queue;//定义一个队列
+    SeqQueueInit(&queue);
+
+    //1. 将根节点入队列
+    SeqQueuePush(&queue,root);
+
+    while(1)
+    {
+        //2. 取队首元素，
+        SeqQueueType top;
+        int ret = SeqQueueTop(&queue,&top);
+        //a)如果获取失败，表明队列为空，此时树遍历结束,直接返回即可
+        if(ret == -1)
+        {
+            return;
+        }
+        //b)否则并出队列，访问队首元素:交换左右子树
+        SeqQueuePop(&queue);
+        Swap(&top->lchild,&top->rchild);
+
+        //3. 如果队首元素的左右子树非空，就分别将左右子树入队列
+        if(top->lchild != NULL)
+        {
+            SeqQueuePush(&queue,top->lchild);
+        }
+        if(top->rchild != NULL)
+        {
+            SeqQueuePush(&queue,top->rchild);
+        }
+        //4. 循环2～3
+
+    }
+}
+//判断一棵树是否为完全二叉树(先序实现)
+int IsCompleteByPre(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return 0;
+    }
+
+    //先序遍历判断每个节点是否满足以下条件，并得出相应结论
+    //判断属于哪个阶段,为0为阶段1，为1为阶段2
+    int which_flags = 0;
+    //阶段一：
+    if(which_flags == 0)
+    {
+
+        //1. 如果一个节点左右孩子均存在，还属于阶段1，则继续往后遍历
+        if(root->lchild != NULL && root->rchild != NULL)
+        {
+            which_flags = 0;
+        }
+        //2. 如果一个节点只有右孩子，则该树不是完全二叉树，直接返回即可。
+        else if(root->lchild == NULL && root->rchild != NULL)
+        {
+            return 0;
+        }
+        //3. 如果一个节点只有左子树，则进入阶段二
+        else if(root->lchild != NULL && root->rchild == NULL)
+        {
+            which_flags = 1;
+        }
+        //4，如果一个节点没有左右孩子，则进入阶段二
+        else
+        {
+            which_flags = 1;
+        }
+    }
+    //阶段二：
+    //该节点之后的节点如果都没有左右孩子，则是完全二叉树，否则不是
+    else
+    {
+        if(root->lchild != NULL || root->rchild != NULL)
+        {
+            return 0;
+        }
+    }
+
+    int lret = IsCompleteByPre(root->lchild);
+    int rret = IsCompleteByPre(root->rchild);
+    //if(lret == 1 && rret == 1)
+    //{
+        return 1;
+    //}
+    //return 0;
+}
+//判断一棵树是否为完全二叉树(中序实现)
+int IsCompleteByIn(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return 0;
+    }
+
+    IsCompleteByIn(root->lchild);
+    //先序遍历判断每个节点是否满足以下条件，并得出相应结论
+    //判断属于哪个阶段,为0为阶段1，为1为阶段2
+    int which_flags = 0;
+    //阶段一：
+    if(which_flags == 0)
+    {
+
+        //1. 如果一个节点左右孩子均存在，还属于阶段1，则继续往后遍历
+        if(root->lchild != NULL && root->rchild != NULL)
+        {
+            which_flags = 0;
+        }
+        //2. 如果一个节点只有右孩子，则该树不是完全二叉树，直接返回即可。
+        else if(root->lchild == NULL && root->rchild != NULL)
+        {
+            return 0;
+        }
+        //3. 如果一个节点只有左子树，则进入阶段二
+        else if(root->lchild != NULL && root->rchild == NULL)
+        {
+            which_flags = 1;
+        }
+        //4，如果一个节点没有左右孩子，则进入阶段二
+        else
+        {
+            which_flags = 1;
+        }
+    }
+    //阶段二：
+    //该节点之后的节点如果都没有左右孩子，则是完全二叉树，否则不是
+    else
+    {
+        if(root->lchild != NULL || root->rchild != NULL)
+        {
+            return 0;
+        }
+    }
+
+    IsCompleteByIn(root->rchild);
+    return 1;
+}
+//判断一棵树是否为完全二叉树(后序实现)
+int IsCompleteByPost(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return 0;
+    }
+
+    IsCompleteByPost(root->lchild);
+    IsCompleteByPost(root->rchild);
+    //先序遍历判断每个节点是否满足以下条件，并得出相应结论
+    //判断属于哪个阶段,为0为阶段1，为1为阶段2
+    int which_flags = 0;
+    //阶段一：
+    if(which_flags == 0)
+    {
+
+        //1. 如果一个节点左右孩子均存在，还属于阶段1，则继续往后遍历
+        if(root->lchild != NULL && root->rchild != NULL)
+        {
+            which_flags = 0;
+        }
+        //2. 如果一个节点只有右孩子，则该树不是完全二叉树，直接返回即可。
+        else if(root->lchild == NULL && root->rchild != NULL)
+        {
+            return 0;
+        }
+        //3. 如果一个节点只有左子树，则进入阶段二
+        else if(root->lchild != NULL && root->rchild == NULL)
+        {
+            which_flags = 1;
+        }
+        //4，如果一个节点没有左右孩子，则进入阶段二
+        else
+        {
+            which_flags = 1;
+        }
+    }
+    //阶段二：
+    //该节点之后的节点如果都没有左右孩子，则是完全二叉树，否则不是
+    else
+    {
+        if(root->lchild != NULL || root->rchild != NULL)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+//判断一棵树是否为完全二叉树(层序实现)
+int IsCompleteByLevel(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return 0;
+    }
+
+    SeqQueue queue;
+    SeqQueueInit(&queue);
+
+    SeqQueuePush(&queue,root);
+
+    SeqQueueType top;
+    int which_flags = 0;//用于判断某个节点应该进入哪个分支，根节点首先进入分支一进行判断，所以初始为0
+    while(1)
+    {
+        int ret = SeqQueueTop(&queue,&top);
+        if(ret == -1)
+        {
+            return 1;//当队列为空时，即所有节点都已经遍历并判断结束，还没有退出，说明是完全二叉树
+        }
+        
+        //出栈
+        SeqQueuePop(&queue);
+        
+        //访问该节点，这里的访问操作实际为对该节点进行如下判断
+        //分支一
+        if(which_flags == 0)
+        {
+
+            //1. 如果一个节点左右孩子均存在，则后面的节点还进入分支1进行判断
+            if(top->lchild != NULL && top->rchild != NULL)
+            {
+                which_flags = 0;
+            }
+            //2. 如果一个节点只有右孩子，则该树不是完全二叉树，直接返回即可。
+            else if(top->lchild == NULL && top->rchild != NULL)
+            {
+                return 0;
+            }
+            //3. 如果一个节点只有左子树，则后面的节点进入分支二
+            else if(top->lchild != NULL && top->rchild == NULL)
+            {
+                which_flags = 1;
+            }
+            //4，如果一个节点没有左右孩子，则后面的节点进入分支二
+            else
+            {
+                which_flags = 1;
+            }
+        }
+        //分支二：
+        //如果某个节点进入了分支2，则它后面的节点都应进入该分支
+        //进入分支2的所有节点如果左右孩子都没有，则为完全二叉树
+        else
+        {
+            //如果进入该分支的某个节点左孩子或右孩子不为空，则必然不是完全二叉树，直接返回即可
+            if(top->lchild != NULL || top->rchild != NULL)
+            {
+                return 0;
+            }
+        }
+
+        if(top->lchild != NULL)
+        {
+            SeqQueuePush(&queue,top->lchild);
+        }
+        if(top->rchild != NULL)
+        {
+            SeqQueuePush(&queue,top->rchild);
+        }
+    }
+}
+
+//寻找根节点在中序序列中的下标
+int Find(char in_order[],size_t in_order_left,size_t in_order_right,TreeType to_find)
+{
+    int cur = in_order_left;
+    for(;cur < in_order_right;cur++)
+    {
+        if(in_order[cur] == to_find)
+        {
+            return cur;
+        }
+    }
+    return -1;
+}
+
+TreeNode* _TreeRebuild(char pre_order[],size_t* pre_order_index,size_t size,\
+        char in_order[],size_t in_order_left,size_t in_order_right)
+{
+    if(pre_order_index == NULL)
+    {
+        //非法输入
+        return NULL;
+    }
+    if(*pre_order_index >= size)
+    {
+        //先序序列遍历结束
+        return NULL;
+    }
+    if(in_order_left >= in_order_right)
+    {
+        //空树
+        return NULL;
+    }
+
+    TreeNode* root = CreateNode(pre_order[*pre_order_index]);//创建当前节点
+
+    //寻找当前节点在中序遍历中的位置下标
+    size_t cur_index_in_order = Find(in_order,in_order_left,in_order_right,pre_order[*pre_order_index]);
+
+    (*pre_order_index)++;//遍历到后一个节点
+
+    //判断当前节点的左子树是否为空，不为空则后一个节点为当前节点的左子树，创建即可
+    root->lchild = _TreeRebuild(pre_order,pre_order_index,size,in_order,in_order_left,cur_index_in_order);
+
+    //当前节点的左子树为空，判断当前节点的右子树是否为空，不为空则后一个节点为当前节点的右子树，创建即可
+    root->rchild = _TreeRebuild(pre_order,pre_order_index,size,in_order,cur_index_in_order + 1,in_order_right);
+
+    //如果当前节点的左右子树都为空，则返回到当前节点的上一层节点
+    //当前节点的左右子树都创建完毕后，返回当前节点所在的子树
+    return root;
+}
+
+TreeNode* TreeRebuild(char pre_order[],char in_order[],size_t size)
+{
+    if(pre_order == NULL || in_order == NULL || size <= 0)
+    {
+        //空树
+        return NULL;
+    }
+
+    //先序序列的当前遍历下标
+    size_t pre_order_index = 0;
+
+    //当前树在中序序列中的下标范围,前闭后开：[0,size)
+    size_t in_order_left = 0;
+    size_t in_order_right = size;
+
+    //进入递归函数，判断树是否为空，为空，则直接返回，不为空则创建节点
+    return _TreeRebuild(pre_order,&pre_order_index,size,in_order,in_order_left,in_order_right);
+}
+
+//TreeNode* _TreeRebuild(TreeType* pre_order,size_t size,size_t* pre_order_index,\
+//        TreeType* in_order,size_t in_order_left,size_t in_order_right)
+//{
+//    if(pre_order == NULL || in_order == NULL || size <= 0) 
+//    {
+//        //空树
+//        return NULL;
+//    }
+//    if(pre_order_index == NULL)
+//    {
+//        //非法输入
+//        return NULL;
+//    }
+//    if(*pre_order_index >= size)
+//    {
+//        //遍历完成
+//        return NULL;
+//    }
+//
+//    if(in_order_left >= in_order_right)
+//    {
+//        //某棵子树为空
+//        return NULL;
+//    }
+//
+//    TreeNode* new_node = CreateNode(pre_order[*pre_order_index]);//创建根节点
+//    int cur_index_in_order = Find(in_order,in_order_left,in_order_right,pre_order[*pre_order_index]);
+//    (*pre_order_index)++;
+//
+//    //查找当前节点在中序序列中所在的下标
+//    assert(cur_index_in_order != -1);
+//
+//    //如果某个节点有左子树(left < right)，则先序序列中在其之后的节点必在左子树中
+//    //如果没有左子树，则先序序列中在其之后的节点必在右子树中
+//
+//    //创建当前节点的左子树
+//    new_node->lchild = _TreeRebuild(pre_order,size,pre_order_index,in_order,in_order_left,cur_index_in_order);
+//    //创建当前节点的右子树
+//    new_node->rchild = _TreeRebuild(pre_order,size,pre_order_index,in_order,cur_index_in_order + 1,in_order_right);
+//    return new_node;
+//}
+//
+////利用先序和中序遍历结果还原一棵二叉树
+//TreeNode* TreeRebuild(TreeType pre_order[],TreeType in_order[],size_t size)
+//{
+//    if(pre_order == NULL || in_order == NULL || size <= 0)
+//    {
+//        //空树0
+//        return NULL;
+//    }
+//    //先序遍历序列的下标
+//    size_t pre_order_index = 0;
+//
+//    //某个树在中序序列中的下标取值范围
+//    size_t in_order_left = 0;
+//    size_t in_order_right = size;
+//
+//    return _TreeRebuild(pre_order,size,&pre_order_index,in_order,in_order_left,in_order_right);
+//
+//}
+///////////////////////////////////////
 //测试代码
 ///////////////////////////////////////
 
@@ -1018,6 +1451,259 @@ void TestPostOrderByLoop()
 
 }
 
+void TestMirror()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    TreeMirror(root);
+    TreePreOrderByLoop(root);
+    printf("\n");
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    TreeMirror(root);
+
+    TreePreOrderByLoop(root);
+    printf("\n");
+    PreOrder(root);
+    printf("\n");
+}
+
+void TestMirrorByLoop()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    TreeMirrorByLoop(root);
+    TreePreOrderByLoop(root);
+    printf("\n");
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    TreeMirrorByLoop(root);
+
+    TreePreOrderByLoop(root);
+    printf("\n");
+    PreOrder(root);
+    printf("\n");
+
+}
+
+void TestIsCompleteByPre()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    int ret;
+    ret = IsCompleteByPre(root);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    printf("expect 0,actually %d\n",ret);
+
+    char arr1[] = "ab##c##";
+    TreeNode* root1 = TreeCreate(arr1,strlen(arr1),'#');
+    ret = IsCompleteByPre(root1);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr2[] = "abd###c##";
+    TreeNode* root2 = TreeCreate(arr2,strlen(arr2),'#');
+    ret = IsCompleteByPre(root2);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr3[] = "abd##e##c##";
+    TreeNode* root3 = TreeCreate(arr3,strlen(arr3),'#');
+    ret = IsCompleteByPre(root3);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr4[] = "abd##e##cf###";
+    TreeNode* root4 = TreeCreate(arr4,strlen(arr4),'#');
+    ret = IsCompleteByPre(root4);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr5[] = "abd###c#f##";
+    TreeNode* root5 = TreeCreate(arr5,strlen(arr5),'#');
+    ret = IsCompleteByLevel(root5);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr6[] = "abdf####c#g###";
+    TreeNode* root6 = TreeCreate(arr6,strlen(arr6),'#');
+    ret = IsCompleteByLevel(root6);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr7[] = "abdh###e##cf##g##";
+    TreeNode* root7 = TreeCreate(arr7,strlen(arr7),'#');
+    ret = IsCompleteByLevel(root7);
+    printf("expect 1,actually %d\n",ret);
+}
+void TestIsCompleteByIn()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    int ret;
+    ret = IsCompleteByIn(root);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    printf("expect 0,actually %d\n",ret);
+
+    char arr1[] = "ab##c##";
+    TreeNode* root1 = TreeCreate(arr1,strlen(arr1),'#');
+    ret = IsCompleteByIn(root1);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr2[] = "abd###c##";
+    TreeNode* root2 = TreeCreate(arr2,strlen(arr2),'#');
+    ret = IsCompleteByIn(root2);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr3[] = "abd##e##c##";
+    TreeNode* root3 = TreeCreate(arr3,strlen(arr3),'#');
+    ret = IsCompleteByIn(root3);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr4[] = "abd##e##cf###";
+    TreeNode* root4 = TreeCreate(arr4,strlen(arr4),'#');
+    ret = IsCompleteByIn(root4);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr5[] = "abd###c#f##";
+    TreeNode* root5 = TreeCreate(arr5,strlen(arr5),'#');
+    ret = IsCompleteByLevel(root5);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr6[] = "abdf####c#g###";
+    TreeNode* root6 = TreeCreate(arr6,strlen(arr6),'#');
+    ret = IsCompleteByLevel(root6);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr7[] = "abdh###e##cf##g##";
+    TreeNode* root7 = TreeCreate(arr7,strlen(arr7),'#');
+    ret = IsCompleteByLevel(root7);
+    printf("expect 1,actually %d\n",ret);
+}
+
+void TestIsCompleteByPost()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    int ret;
+    ret = IsCompleteByPost(root);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    printf("expect 0,actually %d\n",ret);
+
+    char arr1[] = "ab##c##";
+    TreeNode* root1 = TreeCreate(arr1,strlen(arr1),'#');
+    ret = IsCompleteByPost(root1);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr2[] = "abd###c##";
+    TreeNode* root2 = TreeCreate(arr2,strlen(arr2),'#');
+    ret = IsCompleteByPost(root2);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr3[] = "abd##e##c##";
+    TreeNode* root3 = TreeCreate(arr3,strlen(arr3),'#');
+    ret = IsCompleteByPost(root3);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr4[] = "abd##e##cf###";
+    TreeNode* root4 = TreeCreate(arr4,strlen(arr4),'#');
+    ret = IsCompleteByPost(root4);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr5[] = "abd###c#f##";
+    TreeNode* root5 = TreeCreate(arr5,strlen(arr5),'#');
+    ret = IsCompleteByLevel(root5);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr6[] = "abdf####c#g###";
+    TreeNode* root6 = TreeCreate(arr6,strlen(arr6),'#');
+    ret = IsCompleteByLevel(root6);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr7[] = "abdh###e##cf##g##";
+    TreeNode* root7 = TreeCreate(arr7,strlen(arr7),'#');
+    ret = IsCompleteByLevel(root7);
+    printf("expect 1,actually %d\n",ret);
+}
+
+void TestIsCompleteByLevel()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    int ret;
+    ret = IsCompleteByLevel(root);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr[] = "abd#fg####c#e##";
+    root = TreeCreate(arr,strlen(arr),'#');
+    printf("expect 0,actually %d\n",ret);
+
+    char arr1[] = "ab##c##";
+    TreeNode* root1 = TreeCreate(arr1,strlen(arr1),'#');
+    ret = IsCompleteByLevel(root1);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr2[] = "abd###c##";
+    TreeNode* root2 = TreeCreate(arr2,strlen(arr2),'#');
+    ret = IsCompleteByLevel(root2);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr3[] = "abd##e##c##";
+    TreeNode* root3 = TreeCreate(arr3,strlen(arr3),'#');
+    ret = IsCompleteByLevel(root3);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr4[] = "abd##e##cf###";
+    TreeNode* root4 = TreeCreate(arr4,strlen(arr4),'#');
+    ret = IsCompleteByLevel(root4);
+    printf("expect 1,actually %d\n",ret);
+
+    char arr5[] = "abd###c#f##";
+    TreeNode* root5 = TreeCreate(arr5,strlen(arr5),'#');
+    ret = IsCompleteByLevel(root5);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr6[] = "abdf####c#g###";
+    TreeNode* root6 = TreeCreate(arr6,strlen(arr6),'#');
+    ret = IsCompleteByLevel(root6);
+    printf("expect 0,actually %d\n",ret);
+
+    char arr7[] = "abdh###e##cf##g##";
+    TreeNode* root7 = TreeCreate(arr7,strlen(arr7),'#');
+    ret = IsCompleteByLevel(root7);
+    printf("expect 1,actually %d\n",ret);
+}
+
+void TestTreeRebuild()
+{
+    TEST_HANDLE;
+    char pre_order[] = "abdfgc";
+    char in_order[] = "dbfgac";
+    TreeNode* root = TreeRebuild(pre_order,in_order,strlen(pre_order));
+    TreePreOrderByLoop(root);
+    printf("\n");
+    TreeInOrderByLoop(root);
+    printf("\n");
+    return;
+}
+
 int main()
 {
     TestInit();
@@ -1039,5 +1725,12 @@ int main()
     TestPreOrderByLoop();
     TestInOrderByLoop();
     TestPostOrderByLoop();
+    TestMirror();
+    TestMirrorByLoop();
+    TestIsCompleteByPre();
+    TestIsCompleteByIn();
+    TestIsCompleteByPost();
+    TestIsCompleteByLevel();
+    TestTreeRebuild();
     return 0;
 }
