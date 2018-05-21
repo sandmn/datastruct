@@ -1,4 +1,7 @@
+
+//基于哈希桶解决哈希冲突的哈希表的基本操作
 #include"hash_bucket.h"
+
 #include<stdlib.h>
 #include<stdio.h>
 
@@ -112,6 +115,8 @@ void HashInsert(HashTable* ht,KeyType key,ValType value)
     return;
 }
 //在哈希表中中查找元素
+//返回值表示查找成功与否
+//*value保存key处的value值
 int HashFindEx(HashTable* ht,KeyType key,ValType* value)
 {
     if(ht == NULL || value == NULL)
