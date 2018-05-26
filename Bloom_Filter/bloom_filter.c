@@ -44,23 +44,30 @@ void BloomFilterInsert(BloomFilter* bf,const char* str)
     }
     //首先根据字符串哈希算法计算字符串对应的数字
     //然后将计算出的数字根据除留余数法转化为实际对应的比特位下标
-    uint64_t bloomnum[FUNCMAXSIZE];
+
+    //计算一个下标插入一个
     int i = 0;
     for(;i < FUNCMAXSIZE;i++)
     {
-        bloomnum[i] = bf->bloomfunc[i](str) % MAXSIZE;
+        uint64_t bloomnum = bf->bloomfunc[i](str) % MAXSIZE;
+        BitMapSet(&bf->bm,bloomnum);
     }
-    //再将该下标插入到布隆过滤器中的位图中，直接调用位图的插入函数即可
-    for(i = 0;i < FUNCMAXSIZE;i++)
-    {
-        BitMapSet(&bf->bm,bloomnum[i]);
-    }
-    //uint64_t bloomnum1 = bf->bloomfunc[0](str) % MAXSIZE;
-    //uint64_t bloomnum2 = bf->bloomfunc[1](str) % MAXSIZE;
-    ////再将该下标插入到布隆过滤器中的位图中，直接调用位图的插入函数即可
 
-    //BitMapSet(&bf->bm,bloomnum1);
-    //BitMapSet(&bf->bm,bloomnum2);
+//所以下标计算完之后在进行插入
+//    uint64_t bloomnum[FUNCMAXSIZE];//该数组用于存放计算的多个下标值
+//    int i = 0;
+//    for(;i < FUNCMAXSIZE;i++)
+//    {
+//        bloomnum[i] = bf->bloomfunc[i](str) % MAXSIZE;
+//    }
+//    //再将该下标插入到布隆过滤器中的位图中，直接调用位图的插入函数即可
+//    for(i = 0;i < FUNCMAXSIZE;i++)
+//    {
+//        BitMapSet(&bf->bm,bloomnum[i]);
+//    }
+
+
+
     return;
 }
 //在布隆过滤器中判断一个字符串是否存在
@@ -73,23 +80,40 @@ int BloomFilterTest(BloomFilter* bf,const char* str)
     }
     //首先根据字符串哈希算法计算字符串对应的数字
     //在根据该数字计算根据除留余数法计算比特位所在的下标
-    uint64_t bloomnum[FUNCMAXSIZE];
+    
+
+    //计算一个，判断一个
     int i = 0;
     for(;i < FUNCMAXSIZE;i++)
     {
-        bloomnum[i] = bf->bloomfunc[i](str)%MAXSIZE; 
-    }
-    //然后在布隆过滤器中的位图结构中判断这两个比特位的状态
-    //如果均为1，则表示该字符串存在
-    //只要有一个为0，则表示该字符串不存在
-    for(i = 0;i < FUNCMAXSIZE;i++)
-    {
-        if(BitMapTest(&bf->bm,bloomnum[i]) == 0)
+        uint64_t bloomnum = bf->bloomfunc[i](str) % MAXSIZE;
+        int ret = BitMapTest(&bf->bm,bloomnum);
+        if(ret == 0)
         {
             return 0;
         }
     }
     return 1;
+
+
+    //将所有下标计算完之后，再一个个进行判断
+//    uint64_t bloomnum[FUNCMAXSIZE];
+//    int i = 0;
+//    for(;i < FUNCMAXSIZE;i++)
+//    {
+//        bloomnum[i] = bf->bloomfunc[i](str)%MAXSIZE; 
+//    }
+//    //然后在布隆过滤器中的位图结构中判断这两个比特位的状态
+//    //如果均为1，则表示该字符串存在
+//    //只要有一个为0，则表示该字符串不存在
+//    for(i = 0;i < FUNCMAXSIZE;i++)
+//    {
+//        if(BitMapTest(&bf->bm,bloomnum[i]) == 0)
+//        {
+//            return 0;
+//        }
+//    }
+//    return 1;
 }
 ////////////////////////////
 //测试代码

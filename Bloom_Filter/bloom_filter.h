@@ -24,7 +24,7 @@
 #include"bitmap.h"
 
 //以64位8字节作为一个数组元素的内存大小
-typedef uint64_t BloomFilterType;
+//typedef uint64_t BloomFilterType;
 
 #define MAXSIZE 1000//定义布隆过滤器最多有1000个比特位可以使用
 
