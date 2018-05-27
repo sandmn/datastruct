@@ -130,6 +130,8 @@ void SelectSort(int arr[],uint64_t size)
 
 ////////////////////////
 //插入排序：时间复杂度：O(n^2),空间复杂度：O(1),稳定性：稳定
+//插入排序的特点：1. 在元素比较少时，排序效率比较高
+//                2. 在元素有序性比较高的情况下，排序效率比较高
 ////////////////////////
 
 void InsertSort(int arr[],uint64_t size)
@@ -281,6 +283,153 @@ void HeapSort(int arr[],uint64_t size)
     return;
 }
 
+////////////////////////////
+//希尔排序:对带排序的序列进行分组，组内进行插入排序
+//充分利用插入排序的两个特点。
+//首先进行分组使元素个数减少，然后组内进行排序
+//在有序性高的序列中再次使用插入排序
+//希尔序列：n/2 n/4 n/8
+///////////////////////////
+
+void ShellSort(int arr[],uint64_t size)
+{
+    if(arr == NULL || size <= 1)
+    {
+        return;
+    }
+
+    int gap = size/2;
+
+    //第一重循环，对待排序序列进行分组
+    for(;gap >= 1;gap = gap/2)
+    {
+        //第二重循环：计算边界值
+        int bound = gap;
+        //第一次对第一组的第一个元素进行排序
+        //第二次对第二组的第一个元素进行排序
+        //......
+        //对第一组的第二个元素进行排序
+        //对第二组的第二个元素进行排序
+        //。。。
+        for(;bound < size;bound++)
+        {
+            //在组内定义cur进行插入排序
+            int cur = bound;
+            int bound_value = arr[bound];//保存bound处的值
+            for(;cur >= gap;cur = cur - gap)
+            {
+                if(bound_value < arr[cur - gap])
+                {
+                    arr[cur] = arr[cur - gap];
+                }
+                else
+                {
+                    break;
+                }
+            }
+            arr[cur] = bound_value;
+        }
+    }
+}
+
+///////////////////////////////////
+//归幷排序
+//////////////////////////////////
+
+void MergeArray(int arr[],int left,int mid,int right,int temp[])
+{
+    int index1 = left;
+    int index2 = mid + 1;
+//    int* temp = (int*)malloc((right - left + 1)*sizeof(int));
+//    int index = 0;
+    while(index1 <= mid && index2 <= right)
+    {
+        if(arr[index1] < arr[index2])
+        {
+            *temp = arr[index1];
+            index1++;
+            temp++;
+            //index++;
+        }
+        else /*if(arr[index1] > arr[index2])*/
+        {
+            *temp = arr[index2];
+            index2++;
+            temp++;
+            //index++;
+        }
+    }
+    if(index1 > mid)
+    {
+        int i = index2;
+        for(;i <= right;i++)
+        {
+            *temp = arr[i];
+            temp++;
+            //index++;
+        }
+    }
+    else
+    {
+        int i = index1;
+        for(;i <= mid;i++)
+        {
+            *temp = arr[i];
+            temp++;
+            //index++;
+        }
+    }
+
+   // int i = 0;
+   // for(;i < right - left + 1;i++)
+   // {
+   //     arr[i] = *temp;
+   //     temp++;
+   // }
+    return;
+}
+
+void _MergeSort(int arr[],int left,int right,int temp[])
+{
+    if(left >= right)
+    {
+        //带排序区间中最多只有一个元素
+        return;
+    }
+
+    //现将带排序序列一分为二，如果某一部分的元素个数小于等于1，则认为已经排好序
+    int mid = left + (right - left)/2;
+
+    //分别对这两部分进行排序
+    _MergeSort(arr,left,mid,temp);
+    _MergeSort(arr,mid + 1,right,temp);
+    //将排好序的两部分进行合并,即合并两个有序数组
+    MergeArray(arr,left,mid,right,temp);
+    return;
+}
+
+
+void MergeSort(int arr[],uint64_t size)
+{
+    if(arr == NULL || size <= 1)
+    {
+        return;
+    }
+
+    //[left,right)为待排序区间
+    int left = 0;
+    int right = size - 1;
+    int* temp = (int*)malloc(size*sizeof(int));
+    //int index = 0;
+    _MergeSort(arr,left,right,temp);
+    int i = 0;
+    for(;i < size;i++)
+    {
+        arr[i] = temp[i];
+    }
+    return;
+}
+
 /////////////////////////////
 //测试代码
 ////////////////////////////
@@ -377,6 +526,36 @@ void TestHeapSort()
     Print(arr1,size1);
     return;
 }
+//测试希尔排序
+void TestShellSort()
+{
+    TEST_HANDLE;
+    int arr[] = {2,4,1,5,8};
+    uint64_t size = sizeof(arr)/sizeof(arr[0]);
+    ShellSort(arr,size);
+    Print(arr,size);
+
+    int arr1[] = {2};
+    uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
+    ShellSort(arr1,size1);
+    Print(arr1,size1);
+    return;
+}
+//测试归幷排序
+void TestMergeSort()
+{
+    TEST_HANDLE;
+    int arr[] = {2,4,1,5,8};
+    uint64_t size = sizeof(arr)/sizeof(arr[0]);
+    MergeSort(arr,size);
+    Print(arr,size);
+
+    int arr1[] = {2};
+    uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
+    MergeSort(arr1,size1);
+    Print(arr1,size1);
+    return;
+}
 int main()
 {
     TestBubbleSort();
@@ -384,5 +563,7 @@ int main()
     TestSelectSort();
     TestInsertSort();
     TestHeapSort();
+    TestShellSort();
+    TestMergeSort();
     return 0;
 }
