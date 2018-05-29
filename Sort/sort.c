@@ -336,73 +336,55 @@ void ShellSort(int arr[],uint64_t size)
 //归幷排序
 //////////////////////////////////
 
+
 void MergeArray(int arr[],int left,int mid,int right,int temp[])
 {
     int index1 = left;
-    int index2 = mid + 1;
-//    int* temp = (int*)malloc((right - left + 1)*sizeof(int));
-//    int index = 0;
-    while(index1 <= mid && index2 <= right)
+    int index2 = mid;
+    int temp_index = left;
+    while(index1 < mid && index2 < right)
     {
         if(arr[index1] < arr[index2])
         {
-            *temp = arr[index1];
-            index1++;
-            temp++;
-            //index++;
+            temp[temp_index++] = arr[index1++];
         }
-        else /*if(arr[index1] > arr[index2])*/
+        else
         {
-            *temp = arr[index2];
-            index2++;
-            temp++;
-            //index++;
+            temp[temp_index++] = arr[index2++];
         }
     }
-    if(index1 > mid)
+    while(index1 < mid)
     {
-        int i = index2;
-        for(;i <= right;i++)
-        {
-            *temp = arr[i];
-            temp++;
-            //index++;
-        }
+        temp[temp_index++] = arr[index1++];
     }
-    else
+    while(index2 < right)
     {
-        int i = index1;
-        for(;i <= mid;i++)
-        {
-            *temp = arr[i];
-            temp++;
-            //index++;
-        }
+        temp[temp_index++] = arr[index2++];
     }
-
-   // int i = 0;
-   // for(;i < right - left + 1;i++)
-   // {
-   //     arr[i] = *temp;
-   //     temp++;
-   // }
+    //将temp中排好序的元素复制到arr中
+    int i = left;
+    for(;i < right;i++)
+    {
+        arr[i] = temp[i];
+    }
     return;
 }
 
 void _MergeSort(int arr[],int left,int right,int temp[])
 {
-    if(left >= right)
+    if(right - left <= 1)
     {
-        //带排序区间中最多只有一个元素
+        //带排序区间中最多只有一个元素,此时不用在排序
         return;
     }
 
-    //现将带排序序列一分为二，如果某一部分的元素个数小于等于1，则认为已经排好序
+    //现将待排序序列一分为二，如果某一部分的元素个数小于等于1，则认为已经排好序
     int mid = left + (right - left)/2;
+    //此时拆分的两个待区间为：[left,mid),[mid,right)
 
     //分别对这两部分进行排序
     _MergeSort(arr,left,mid,temp);
-    _MergeSort(arr,mid + 1,right,temp);
+    _MergeSort(arr,mid,right,temp);
     //将排好序的两部分进行合并,即合并两个有序数组
     MergeArray(arr,left,mid,right,temp);
     return;
@@ -418,15 +400,10 @@ void MergeSort(int arr[],uint64_t size)
 
     //[left,right)为待排序区间
     int left = 0;
-    int right = size - 1;
+    int right = size;
+    //定义temp来保存合并两个已经排好序的区间
     int* temp = (int*)malloc(size*sizeof(int));
-    //int index = 0;
     _MergeSort(arr,left,right,temp);
-    int i = 0;
-    for(;i < size;i++)
-    {
-        arr[i] = temp[i];
-    }
     return;
 }
 
