@@ -333,17 +333,22 @@ void ShellSort(int arr[],uint64_t size)
 }
 
 ///////////////////////////////////
-//归幷排序
+//归幷排序（递归）
 //////////////////////////////////
 
 
+//合并两个有序数组使之成为新的有序数组
 void MergeArray(int arr[],int left,int mid,int right,int temp[])
 {
+    //使合并后的新的有序数组的下标与两个有序数组的下标对应
     int index1 = left;
     int index2 = mid;
-    int temp_index = left;
+    int temp_index = left;//新数组中的有序元素从left到right
+
+    //如果两个有序子数组没有遍历完，就一直遍历直到某个数组遍历结束
     while(index1 < mid && index2 < right)
     {
+        //使值小的元素先复制到新的数组
         if(arr[index1] < arr[index2])
         {
             temp[temp_index++] = arr[index1++];
@@ -353,6 +358,7 @@ void MergeArray(int arr[],int left,int mid,int right,int temp[])
             temp[temp_index++] = arr[index2++];
         }
     }
+    //将还未遍历完子数组的剩余元素一个个的赋值到新数组中
     while(index1 < mid)
     {
         temp[temp_index++] = arr[index1++];
@@ -362,6 +368,7 @@ void MergeArray(int arr[],int left,int mid,int right,int temp[])
         temp[temp_index++] = arr[index2++];
     }
     //将temp中排好序的元素复制到arr中
+    //以便下一次接着对arr进行合并
     int i = left;
     for(;i < right;i++)
     {
@@ -391,6 +398,7 @@ void _MergeSort(int arr[],int left,int right,int temp[])
 }
 
 
+//递归进行归幷排序
 void MergeSort(int arr[],uint64_t size)
 {
     if(arr == NULL || size <= 1)
@@ -410,7 +418,6 @@ void MergeSort(int arr[],uint64_t size)
 /////////////////////////////
 //测试代码
 ////////////////////////////
-
 
 #include<stdio.h>
 #define TEST_HANDLE printf("=================%s==============\n",__FUNCTION__)
