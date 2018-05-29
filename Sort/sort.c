@@ -415,6 +415,58 @@ void MergeSort(int arr[],uint64_t size)
     return;
 }
 
+////////////////////////////
+//归幷排序（非递归）
+////////////////////////////
+
+void MergeSortByLoop(int arr[],int size)
+{
+    if(arr == NULL || size <= 1)
+    {
+        //数组非法或者元素个数小于等于1，此时都不需要进行排序，直接返回即可
+        return;
+    }
+    //1. 首先，取步长gap为1，
+    //   合并区间：[0*gap,1*gap),[1*gap,2*gap)
+    //             [2*gap,3*gap),[3*gap,4*gap)
+    //             [4*gap,5*gap),[5*gap,6*gap).......
+    //2.然后，取步长gap为2，
+    //  合并区间：[0*gap,1*gap),[1*gap,2*gap)
+    //            [2*gap,3*gap),[3*gap,4*gap]......
+    //3.取步长gap为4，同理合并区间[0*gap,1*gap),[1*gap,2*gap).....
+    //4.步长的改变为：1，2，4，8，...,直到步长gap最大为size,此时就不需要在合并了
+    //上述过程中，需要两重循环来实现，第一重用于步长的改变，第二重用于区间的合并
+    
+    int* temp = (int*)malloc(size*sizeof(int));
+    
+    //步长的变化为：1，2，4，8,...后一次的步长是上一次的2倍
+    int gap = 1;
+    for(;gap < size;gap = 2*gap)
+    {
+        //每两个区间之间的间隔为：2*gap
+        //即：0，2*gap,4*gap,8*gap,...
+        //所以区间的增长差2*gap
+        int index = 0;
+        for(;index < size;index = index + 2*gap)
+        {
+            int left = index;
+            int mid = index + gap;
+            
+            //防止最后只剩余一个区间，从而无法进行合并
+            if(mid >= size)
+            {
+                mid = left;
+            }
+            int right = index + 2*gap;
+            if(right >= size)
+            {
+                right = left;
+            }
+            MergeArray(arr,left,mid,right,temp);
+        }
+    }
+}
+
 /////////////////////////////
 //测试代码
 ////////////////////////////
@@ -540,6 +592,21 @@ void TestMergeSort()
     Print(arr1,size1);
     return;
 }
+//测试非递归归幷排序
+void TestMergeByLoopSort()
+{
+    TEST_HANDLE;
+    int arr[] = {2,4,1,5,8};
+    uint64_t size = sizeof(arr)/sizeof(arr[0]);
+    MergeSortByLoop(arr,size);
+    Print(arr,size);
+
+    int arr1[] = {2};
+    uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
+    MergeSortByLoop(arr1,size1);
+    Print(arr1,size1);
+    return;
+}
 int main()
 {
     TestBubbleSort();
@@ -549,5 +616,6 @@ int main()
     TestHeapSort();
     TestShellSort();
     TestMergeSort();
+    TestMergeByLoopSort();
     return 0;
 }
