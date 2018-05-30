@@ -1,6 +1,6 @@
 .PHONY:clean
 
-sort:sort.c
+sort:sort.c seqstack.c
 	gcc -o $@ -g $^
 
 clean:

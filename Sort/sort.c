@@ -2,16 +2,17 @@
 #include<stdint.h>
 #include<stdlib.h>
 #include<stdio.h>
+#include"seqstack.h"
 
-void Print(int arr[],uint64_t size)
-{
-    int index = 0;
-    for(;index < size;index++)
-    {
-        printf("%d ",arr[index]);
-    }
-    printf("\n");
-}
+//void Print(int arr[],uint64_t size)
+//{
+//    int index = 0;
+//    for(;index < size;index++)
+//    {
+//        printf("%d ",arr[index]);
+//    }
+//    printf("\n");
+//}
 
 ///////////////////////////////
 //冒泡排序（升序）（从后往前冒）
@@ -276,7 +277,7 @@ void HeapSort(int arr[],uint64_t size)
     //首先根据数组构建大堆（在数组的基础上构建）
     //构建堆时，有两种方法：上浮式调整和下沉式调整
     CreateHeap(arr,size);
-    Print(arr,size);
+    //Print(arr,size);
     //再对堆元素进行删除
     DeleteHeap(arr,size);
     //删除完之后的堆（数组）即为升序后的数组
@@ -468,22 +469,174 @@ void MergeSortByLoop(int arr[],int size)
 }
 
 /////////////////////////////
+//快速排序（递归）
+/////////////////////////////
+
+//挖坑法
+int Pattern2(int arr[],int left,int right)
+{
+    if(right - left <= 1)
+    {
+        return left;
+    }
+    int left_index = 0;
+    int right_index = right - 1;
+    int basic_value = arr[right - 1];
+    while(left_index < right_index)
+    {
+        while(left_index < right_index && arr[left_index] <= basic_value)
+        {
+            left_index++;
+        }
+        if(arr[left_index] > basic_value)
+        {
+            arr[right_index] = arr[left_index];
+        }
+        while(left_index < right_index && arr[right_index] >= basic_value)
+        {
+            right_index--;
+        }
+        if(arr[right_index] < basic_value)
+        {
+            arr[left_index] = arr[right_index];
+        }
+    }
+    arr[left_index] = basic_value;
+    return left_index;
+
+}
+
+
+//交换法
+int Pattern1(int arr[],int left,int right)
+{
+    //该函数用于给基准值找一个合适的位置，
+    //使得在基准值之前的元素都小于等于基准值
+    //在基准值之后的元素都大于等于基准值
+    //所以要先从前往后遍历使数组前面的元素小于等于基准值
+    //从后往前遍历使后面的元素大于等于基准值
+    //当两个遍历索引相遇时，一定找到了小于基准值和大于据准值元素的分界点
+    //此时将分界点处的值替换为基准值即可保证上述的要求
+
+
+    //如果数组只有一个元素，则基准值直接放置在起始位置即可
+    if(right - left <= 1)
+    {
+        return left;
+    }
+    //从起始位置开始往后遍历寻找大于基准值的数组元素
+    int left_index = left;
+    int right_index = right - 1;
+    //从末尾位置开始往前遍历寻找小于基准值的数组元素
+    //将基准值设置为所在区间的最后一个元素值
+    int basic_value = arr[right - 1];
+
+    while(left_index < right_index)
+    {
+        //如果从前往后找到大于基准值的元素，就停下来
+        while(left_index < right_index && arr[left_index] <= basic_value)
+        {
+            left_index++;
+        }
+        //如果从后往前找到小于基准值的元素，就停下来
+        while(left_index < right_index && arr[right_index] >= basic_value)
+        {
+            right_index--;
+        }
+        //交换停下来的两个值
+        Swap(&arr[left_index],&arr[right_index]);
+    }
+    Swap(&arr[left_index],&arr[right - 1]);
+    return left_index;
+}
+
+void _QuickSort(int arr[],int left,int right)
+{
+    if(arr == NULL || right - left <= 1)
+    {
+        return;
+    }
+    //先找一个基准值，这里设置数组最后一个元素基准值
+    //找到放置基准值的位置，使得在该位置之前的数组元素小于等于基准值
+    //在该位置之后的数组元素大于等于基准值
+
+    //int mid = Pattern1(arr,left,right);
+    int mid = Pattern2(arr,left,right);
+   
+    _QuickSort(arr,left,mid);
+    _QuickSort(arr,mid + 1,right);
+}
+void QuickSort(int arr[],int size)
+{
+    if(arr == NULL || size <= 1)
+    {
+        return;
+    }
+    int left = 0;
+    int right = size;
+    
+    _QuickSort(arr,left,right);
+}
+
+///////////////////////////
+//快速排序（非递归）
+///////////////////////////
+
+void QuickSortByLoop(int arr[],int size)
+{
+    if(arr == NULL || size <= 1)
+    {
+        return;
+    }
+
+    SeqStack stack;
+    InitSeqStack(&stack);
+    SeqStackPush(&stack,0);
+    SeqStackPush(&stack,size);
+
+    int left;
+    int right;
+
+    while(1)
+    {
+        int ret = SeqStackTop(&stack,&right);
+        if(ret == -1)
+        {
+            return;
+        }
+        SeqStackPop(&stack);
+        SeqStackTop(&stack,&left);
+        SeqStackPop(&stack);
+        if(right - left <= 1)
+        {
+            continue;
+        }
+        int mid = Pattern1(arr,left,right);
+        SeqStackPush(&stack,left);
+        SeqStackPush(&stack,mid);
+        SeqStackPush(&stack,mid + 1);
+        SeqStackPush(&stack,right);
+    }
+    return;
+}
+
+/////////////////////////////
 //测试代码
 ////////////////////////////
 
 #include<stdio.h>
 #define TEST_HANDLE printf("=================%s==============\n",__FUNCTION__)
 
-//void Print(int arr[],uint64_t size)
-//{
-//    int index = 0;
-//    for(;index < size;index++)
-//    {
-//        printf("%d ",arr[index]);
-//    }
-//    printf("\n");
-//}
-//
+void Print(int arr[],uint64_t size)
+{
+    int index = 0;
+    for(;index < size;index++)
+    {
+        printf("%d ",arr[index]);
+    }
+    printf("\n");
+}
+
 //测试冒泡排序（从后往前冒）
 void TestBubbleSort()
 {
@@ -607,6 +760,36 @@ void TestMergeByLoopSort()
     Print(arr1,size1);
     return;
 }
+//测试快速排序
+void TestQuickSort()
+{
+    TEST_HANDLE;
+    int arr[] = {2,4,1,5,8};
+    uint64_t size = sizeof(arr)/sizeof(arr[0]);
+    QuickSort(arr,size);
+    Print(arr,size);
+
+    int arr1[] = {2};
+    uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
+    QuickSort(arr1,size1);
+    Print(arr1,size1);
+    return;
+}
+//测试非递归快速排序
+void TestQuickSortByLoop()
+{
+    TEST_HANDLE;
+    int arr[] = {2,4,1,5,8};
+    uint64_t size = sizeof(arr)/sizeof(arr[0]);
+    QuickSortByLoop(arr,size);
+    Print(arr,size);
+
+    int arr1[] = {2};
+    uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
+    QuickSortByLoop(arr1,size1);
+    Print(arr1,size1);
+    return;
+}
 int main()
 {
     TestBubbleSort();
@@ -617,5 +800,7 @@ int main()
     TestShellSort();
     TestMergeSort();
     TestMergeByLoopSort();
+    TestQuickSort();
+    TestQuickSortByLoop();
     return 0;
 }
