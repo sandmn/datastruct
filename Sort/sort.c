@@ -4,6 +4,20 @@
 #include<stdio.h>
 #include"seqstack.h"
 
+typedef int(*Compare)(int a,int b);
+
+//升序比较规则
+int Greater(int a,int b)
+{
+    return a > b? 1 : 0;
+}
+
+//降序比较规则
+int Less(int a,int b)
+{
+    return a < b? 1 : 0;
+}
+
 //void Print(int arr[],uint64_t size)
 //{
 //    int index = 0;
@@ -28,7 +42,8 @@ void Swap(int* a,int* b)
 }
 
 
-void BubbleSort(int arr[],uint64_t size)
+//从后往前冒
+void BubbleSort(int arr[],uint64_t size,Compare cmp)
 {
     if(arr == NULL || size <= 1)
     {
@@ -37,10 +52,11 @@ void BubbleSort(int arr[],uint64_t size)
     int bound = 0;
     for(;bound < size - 1;bound++)
     {
+        //在每一轮排序中从往前比较
         int cur = size - 1;
         for(;cur > bound;cur--)
         {
-            if(arr[cur] < arr[cur - 1])
+            if(cmp(arr[cur - 1],arr[cur]) == 1)
             {
                 Swap(&arr[cur],&arr[cur - 1]);
             }
@@ -78,25 +94,41 @@ void BubbleSort(int arr[],uint64_t size)
 //冒泡排序：升序（从前往后冒）
 ///////////////////////////////
 
-void BubbleSortEx(int arr[],uint64_t size)
+//从前往后冒
+void BubbleSortEx(int arr[],uint64_t size,Compare cmp)
 {
     if(arr == NULL || size <= 1)
     {
         return;
     }
-    int bound = 0;
-    for(;bound < size - 1;bound++)
+
+    //此时，[0,bound]为带排序区间,(bound,size)为已排序区间
+    int bound = size - 1;
+    for(;bound > 0;bound--)
     {
         int cur = 0;
-        for(;cur < size - 1 - bound;++cur)
+        for(;cur < bound;cur++)
         {
-            if(arr[cur] > arr[cur + 1])
+            if(cmp(arr[cur],arr[cur + 1]) == 1)
             {
                 Swap(&arr[cur],&arr[cur + 1]);
             }
         }
     }
     return;
+   // int bound = 0;
+   // for(;bound < size - 1;bound++)
+   // {
+   //     int cur = 0;
+   //     for(;cur < size - 1 - bound;++cur)
+   //     {
+   //         if(arr[cur] > arr[cur + 1])
+   //         {
+   //             Swap(&arr[cur],&arr[cur + 1]);
+   //         }
+   //     }
+   // }
+   // return;
 }
 
 
@@ -106,7 +138,8 @@ void BubbleSortEx(int arr[],uint64_t size)
 //时间复杂度：O(n^2),空间复杂度：O(1),稳定性：不稳定
 //////////////////////////
 
-void SelectSort(int arr[],uint64_t size)
+//选择排序:打擂主，边界值每次做擂主，使边界后的各元素与擂主比较
+void SelectSort(int arr[],uint64_t size,Compare cmp)
 {
     if(arr == NULL || size <= 1)
     {
@@ -120,7 +153,7 @@ void SelectSort(int arr[],uint64_t size)
         int cur = bound + 1;
         for(;cur < size;cur++)
         {
-            if(arr[bound] > arr[cur])
+            if(cmp(arr[bound],arr[cur]) == 1)
             {
                 Swap(&arr[bound],&arr[cur]);
             }
@@ -135,7 +168,7 @@ void SelectSort(int arr[],uint64_t size)
 //                2. 在元素有序性比较高的情况下，排序效率比较高
 ////////////////////////
 
-void InsertSort(int arr[],uint64_t size)
+void InsertSort(int arr[],uint64_t size,Compare cmp)
 {
     if(arr == NULL || size <= 1)
     {
@@ -156,7 +189,7 @@ void InsertSort(int arr[],uint64_t size)
         int bound_value = arr[bound];
         for(;cur > 0;cur--)
         {
-            if(arr[cur - 1] > bound_value)
+            if(cmp(arr[cur - 1],bound_value) == 1)
             {
                 arr[cur] = arr[cur - 1];
             }
@@ -175,7 +208,8 @@ void InsertSort(int arr[],uint64_t size)
 //如果是升序，则构建大堆
 /////////////////////////
 
-void AdjustUp(int arr[],uint64_t size,int index)
+//上浮式调整
+void AdjustUp(int arr[],uint64_t size,int index,Compare cmp)
 {
     if(index >= size || index < 0)
     {
@@ -183,37 +217,38 @@ void AdjustUp(int arr[],uint64_t size,int index)
     }
     //上浮式调整时：
     //比较孩子节点与其父节点的大小关系，
-    //如果不满足条件（此处条件为父节点应该大于字节点的值），则进行交换
-    //如果满足条件，则停止调整:有问题
+    //如果不满足条件（此处条件为父节点应该大于子节点的值），则进行交换
+    //如果满足条件，则停止调整
     int child = index;
     int parent = (child - 1)/2;
     while(child > 0)
     {
-        if(arr[parent] < arr[child])
+        if(cmp(arr[child],arr[parent] == 1))
         {
             Swap(&arr[parent],&arr[child]);
+            child = parent;
+            parent = (child - 1)/2;
         }
         else
         {
             break;
         }
-        child = parent;
-        parent = (child - 1)/2;
     }
 }
 
 //对堆顶元素进行下沉式调整
-void AdjustDown(int arr[],uint64_t heap_size,int index)
+void AdjustDown(int arr[],uint64_t heap_size,int index,Compare cmp)
 {
     int parent = index;
     int child = parent*2 + 1;
-    while(child < heap_size)
+    while(child < heap_size)//左孩子节点存在
     {
-        if(child + 1 < heap_size && arr[child] < arr[child + 1])
+        //右孩子节点存在，且右孩子节点的值大于右孩子节点的值
+        if(child + 1 < heap_size && cmp(arr[child + 1],arr[child]) == 1)
         {
             child = child + 1;
         }
-        if(arr[child] > arr[parent])
+        if(cmp(arr[child],arr[parent]) == 1)
         {
             Swap(&arr[child],&arr[parent]);
             parent = child;
@@ -235,9 +270,9 @@ void CreateHeap(int arr[],uint64_t size)
     //从第一个非叶子节点开始下沉，依次往前，每次下沉一个
     //第一个非叶子节点为最后一个节点的父节点
     int index = ((size - 1) - 1)/2;//第一个非叶子节点
-    for(;index >= 0;index--)//注意
+    for(;index >= 0;index--)//注意,下标为0的元素也需要进行下沉调整
     {
-        AdjustDown(arr,size,index);
+        AdjustDown(arr,size,index,Greater);
     }
     
 
@@ -248,7 +283,7 @@ void CreateHeap(int arr[],uint64_t size)
     //for(;index < size;index++)
     //{
     //    //每次从index处向上进行调整
-    //    AdjustUp(arr,size,index);
+    //    AdjustUp(arr,size,index,Greater);
     //}
     return;
 }
@@ -261,10 +296,17 @@ void DeleteHeap(int arr[],uint64_t size)
     //每次从最后一个堆元素开始
     for(;index > 0;index--)
     {
+        //删除堆顶元素时：
+        //1. 将堆的最后一个元素与堆顶元素进行交换，
+        //   这里堆的最后一个元素下标为index,此时堆中的元素个数为index + 1
+        //2. 然后使堆元素个数减1，此时堆中元素个数为index
+        //3. 最后在新堆中对新堆顶元素进行下沉式调整，此时堆的元素个数依然为index
+       
         //每次将最后一个堆元素与堆顶元素交换
         Swap(&arr[0],&arr[index]);
         //然后堆顶元素进行下沉式调整
-        AdjustDown(arr,index,0);
+        AdjustDown(arr,index,0,Greater);
+        //这里的参数index表示的是堆中的元素个数，该步操作隐含了堆元素个数减1的操作
     }
 
 }
@@ -292,7 +334,8 @@ void HeapSort(int arr[],uint64_t size)
 //希尔序列：n/2 n/4 n/8
 ///////////////////////////
 
-void ShellSort(int arr[],uint64_t size)
+//希尔排序
+void ShellSort(int arr[],uint64_t size,Compare cmp)
 {
     if(arr == NULL || size <= 1)
     {
@@ -317,9 +360,15 @@ void ShellSort(int arr[],uint64_t size)
             //在组内定义cur进行插入排序
             int cur = bound;
             int bound_value = arr[bound];//保存bound处的值
+            //这里注意cur的判断条件：假设步长取值为3
+            //则对应的三个分组第一个元素分别为：0，1，2
+            //对任一分组，cur减至每个分组的第一个元素下标时，停止前移
+            //因为分组的不同，对应的第一个元素下标也不同，但是任一分组第一个元素下标都是小于步长3的
+            //所以对任一分组，可以将条件设置为当cur的值小于步长3时停止前移
+            //也就是说cur大于等于步长3时仍可以前移，所以这里的条件为：cur>=gap
             for(;cur >= gap;cur = cur - gap)
             {
-                if(bound_value < arr[cur - gap])
+                if(cmp(arr[cur - gap],bound_value) == 1)
                 {
                     arr[cur] = arr[cur - gap];
                 }
@@ -412,6 +461,7 @@ void MergeSort(int arr[],uint64_t size)
     int right = size;
     //定义temp来保存合并两个已经排好序的区间
     int* temp = (int*)malloc(size*sizeof(int));
+    //使用递归函数来对带排序序列进行排序
     _MergeSort(arr,left,right,temp);
     return;
 }
@@ -481,17 +531,23 @@ int Pattern2(int arr[],int left,int right)
     }
     int left_index = 0;
     int right_index = right - 1;
+    //基准值为带排序序列的最后一个元素
     int basic_value = arr[right - 1];
+    //当left_index和right_index没有相遇时
     while(left_index < right_index)
     {
+        //如果没有相遇且left_index遇到小于等于基准值的元素，则left_index后移
         while(left_index < right_index && arr[left_index] <= basic_value)
         {
             left_index++;
         }
+        //如果没有相遇且left_index遇到大于基准值的元素
         if(arr[left_index] > basic_value)
         {
+            //将该元素赋值到坑所在位置
             arr[right_index] = arr[left_index];
         }
+        //同理
         while(left_index < right_index && arr[right_index] >= basic_value)
         {
             right_index--;
@@ -501,7 +557,10 @@ int Pattern2(int arr[],int left,int right)
             arr[left_index] = arr[right_index];
         }
     }
+    //当left_index与right_index相遇时，一定位于坑所在的位置
+    //此时，将基准值赋值到该处即可
     arr[left_index] = basic_value;
+    //返回基准值放置的位置
     return left_index;
 
 }
@@ -550,6 +609,7 @@ int Pattern1(int arr[],int left,int right)
     return left_index;
 }
 
+//递归函数
 void _QuickSort(int arr[],int left,int right)
 {
     if(arr == NULL || right - left <= 1)
@@ -589,8 +649,9 @@ void QuickSortByLoop(int arr[],int size)
         return;
     }
 
-    SeqStack stack;
-    InitSeqStack(&stack);
+    SeqStack stack;//定义栈
+    InitSeqStack(&stack);//初始化栈
+    //入栈整个待排序序列的首位坐标
     SeqStackPush(&stack,0);
     SeqStackPush(&stack,size);
 
@@ -599,19 +660,27 @@ void QuickSortByLoop(int arr[],int size)
 
     while(1)
     {
+        //取栈顶元素作为带排序序列的尾坐标
         int ret = SeqStackTop(&stack,&right);
-        if(ret == -1)
+        if(ret == -1)//栈定为空，带排序序列处理完
         {
             return;
         }
+        //出栈后再取栈顶元素
         SeqStackPop(&stack);
+        //此时的栈定元素必为带排序序列的首坐标
         SeqStackTop(&stack,&left);
+        //出栈栈顶元素
         SeqStackPop(&stack);
+        //如果带排序序列元素个数小于等于1，则该序列必然已经排好序
+        //且不能在分为更小的序列，也就不需要再进行排序再进行入栈了
         if(right - left <= 1)
         {
             continue;
         }
+        //对带排序序列进行排序处理
         int mid = Pattern1(arr,left,right);
+        //将带排序序列分为两部分分别入栈，进行处理
         SeqStackPush(&stack,left);
         SeqStackPush(&stack,mid);
         SeqStackPush(&stack,mid + 1);
@@ -643,13 +712,13 @@ void TestBubbleSort()
     TEST_HANDLE;
     int arr[] = {2,4,1,5,8};
     uint64_t size = sizeof(arr)/sizeof(arr[0]);
-    BubbleSort(arr,size);
+    BubbleSort(arr,size,Greater);
     Print(arr,size);
 
 
     int arr1[] = {2};
     uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
-    BubbleSort(arr1,size1);
+    BubbleSort(arr1,size1,Greater);
     Print(arr1,size1);
     return;
 }
@@ -659,12 +728,12 @@ void TestBubbleSortEx()
     TEST_HANDLE;
     int arr[] = {2,4,1,5,8};
     uint64_t size = sizeof(arr)/sizeof(arr[0]);
-    BubbleSortEx(arr,size);
+    BubbleSortEx(arr,size,Greater);
     Print(arr,size);
 
     int arr1[] = {2};
     uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
-    BubbleSortEx(arr1,size1);
+    BubbleSortEx(arr1,size1,Greater);
     Print(arr1,size1);
     return;
 }
@@ -674,12 +743,12 @@ void TestSelectSort()
     TEST_HANDLE;
     int arr[] = {2,4,1,5,8};
     uint64_t size = sizeof(arr)/sizeof(arr[0]);
-    SelectSort(arr,size);
+    SelectSort(arr,size,Greater);
     Print(arr,size);
 
     int arr1[] = {2};
     uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
-    SelectSort(arr1,size1);
+    SelectSort(arr1,size1,Greater);
     Print(arr1,size1);
     return;
 }
@@ -690,12 +759,12 @@ void TestInsertSort()
     TEST_HANDLE;
     int arr[] = {2,4,1,5,8};
     uint64_t size = sizeof(arr)/sizeof(arr[0]);
-    InsertSort(arr,size);
+    InsertSort(arr,size,Greater);
     Print(arr,size);
 
     int arr1[] = {2};
     uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
-    InsertSort(arr1,size1);
+    InsertSort(arr1,size1,Greater);
     Print(arr1,size1);
     return;
 }
@@ -721,12 +790,12 @@ void TestShellSort()
     TEST_HANDLE;
     int arr[] = {2,4,1,5,8};
     uint64_t size = sizeof(arr)/sizeof(arr[0]);
-    ShellSort(arr,size);
+    ShellSort(arr,size,Greater);
     Print(arr,size);
 
     int arr1[] = {2};
     uint64_t size1 = sizeof(arr1)/sizeof(arr1[0]);
-    ShellSort(arr1,size1);
+    ShellSort(arr1,size1,Greater);
     Print(arr1,size1);
     return;
 }
