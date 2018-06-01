@@ -1038,6 +1038,12 @@ void LinkListReversePrint(LinkListNode* head)
 		LinkListNode* fast = head;//定义快指针
 		LinkListNode* slow = head;//定义满指针
 		int i =0;
+        //当k的值等于链表的长度如5时，在循环结束时，K = 5，且fast==NULL
+        //此时，倒数第5个节点正好是第一个节点
+        //所以不能用fast==NULL作为K大于链表元素个数的判断条件
+        //当k等于链表的元素个数以及小于元素的节点个数时，都会走到 i = K这一步
+        //但是当K大于元素节点个数时，不会走到i = K这一步，就退出循环了
+        //因此用i < K来判断K大于节点个数的情况
 		for(;i < k;i++)//使快指针先走k步
 		{
 			if(fast == NULL)//说明此时k大于等于链表的长度
