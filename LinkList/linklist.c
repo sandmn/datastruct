@@ -1333,8 +1333,6 @@ int LinkListHasCrossWithCircle(LinkListNode* head1,LinkListNode* head2)
 		cur1 = cur1->next;
 	}
 	return 0;//两带环链表不相交
-
-
 }
 
 //判相交，求交点(两链表可能带环)
@@ -1613,7 +1611,9 @@ ComplexNode* CopyComplexListEx(ComplexNode* head)
 	}
 	//首先，在原链表每个节点后面插入相同的节点
 	ComplexNode* cur = head;
-	for(;cur != NULL;cur = cur->next->next)//如果cur不为空，则一定可以在其后插入一个新元素，所以cur->next也一定不为空
+
+    //如果cur不为空，则一定可以在其后插入一个新元素，所以cur->next也一定不为空
+	for(;cur != NULL;cur = cur->next->next)
 	{
 		ComplexNode* new_node = CreateComplexNode(cur->data);
 		new_node->next = cur->next;
@@ -1655,6 +1655,56 @@ ComplexNode* CopyComplexListEx(ComplexNode* head)
 	}
 	return new_head;
 }
+
+//先打印倒数第k个节点之后的节点，在打印倒数第k个节点之前的节点
+LinkListNode *rotateRight(LinkListNode *head, int k) 
+{
+    if(head == NULL)
+    {
+        return NULL;
+
+    }
+    //统计链表的结点个数
+    int length = 0;
+    LinkListNode* cur = head;
+    while(cur != NULL)
+    {
+        length++;
+        cur = cur->next;
+    }
+
+    //先根据k找到链表的倒数第K个结点
+    LinkListNode* node_k = LinkListFindLastKNode(head,k);
+    if(node_k == NULL)
+    {
+        return NULL;
+    }
+    if(node_k == head)
+    {
+        return head;
+    }
+
+    //将倒数第k个结点之前结点的next域设置为NULL
+    cur = head;
+    int index = 0;
+    for(;index < length - k - 1;index++)
+    {
+        cur = cur->next;
+    }
+    cur->next = NULL;
+
+    //找到链表的最后一个节点
+    LinkListNode* kcur = node_k;
+    index = 0;
+    for(;index < k - 1;index++)
+    {
+        kcur = kcur->next;
+    }
+    kcur->next = head;
+    //head = node_k;
+    return node_k;
+}
+
 ////////////////////////////////////
 //测试代码
 ///////////////////////////////////
@@ -1662,47 +1712,47 @@ ComplexNode* CopyComplexListEx(ComplexNode* head)
 #include<stdio.h>
 #define TEST_HANDLE printf("\n====================%s===================\n",__FUNCTION__)
 
-	void TestInit()
-	{
-		TEST_HANDLE;
-		LinkListNode* head;
-		LinkListInit(&head);
-		return;
-	}
+void TestInit()
+{
+    TEST_HANDLE;
+    LinkListNode* head;
+    LinkListInit(&head);
+    return;
+}
 
-	void LinkListPrint(LinkListNode* head,const char* msg)
-	{
-		printf("%s\n",msg);
-		LinkListNode* cur = head;
+void LinkListPrint(LinkListNode* head,const char* msg)
+{
+    printf("%s\n",msg);
+    LinkListNode* cur = head;
 
-		while(cur != NULL)
-		{
-			printf("[%c] ",cur->data);
-			cur = cur->next;
-		}
-		printf("\n\n");
-		return;
-	}
+    while(cur != NULL)
+    {
+        printf("[%c] ",cur->data);
+        cur = cur->next;
+    }
+    printf("\n\n");
+    return;
+}
 
-	void TestPushBack()
-	{
-		TEST_HANDLE;
-		LinkListNode* head;
-		LinkListInit(&head);
-		LinkListPushBack(&head,'a');
-		LinkListPushBack(&head,'b');
-		LinkListPushBack(&head,'c');
-		LinkListPushBack(&head,'d');
+void TestPushBack()
+{
+    TEST_HANDLE;
+    LinkListNode* head;
+    LinkListInit(&head);
+    LinkListPushBack(&head,'a');
+    LinkListPushBack(&head,'b');
+    LinkListPushBack(&head,'c');
+    LinkListPushBack(&head,'d');
 
-		LinkListPrint(head,"尾插四个元素\n");
-		return;
-	}
-	//测试尾删1
-	void TestPopBack1()
-	{
-		TEST_HANDLE;
-		LinkListNode* head;
-		LinkListInit(&head);
+    LinkListPrint(head,"尾插四个元素\n");
+    return;
+}
+//测试尾删1
+void TestPopBack1()
+{
+    TEST_HANDLE;
+    LinkListNode* head;
+    LinkListInit(&head);
 
 		LinkListPopBack1(&head);//尾删空链表
 		LinkListPrint(head,"尾删空链表\n");
@@ -2712,6 +2762,24 @@ void TestCopyComplexListEx()
 	return;
 }
 
+void Test()
+{
+    TEST_HANDLE;
+    LinkListNode* head;
+    LinkListInit(&head);
+
+    LinkListPushBack(&head,'a');
+    LinkListPushBack(&head,'b');
+    LinkListPushBack(&head,'c');
+    LinkListPushBack(&head,'d');
+    LinkListPushBack(&head,'e');
+
+    LinkListNode* h = rotateRight(head,6);
+    LinkListPrint(h,"打印转换后的链表");
+    return;
+
+}
+
 int main()
 {
 	TestInit();
@@ -2754,5 +2822,6 @@ int main()
 	TestUnionSetNoSort();
 	TestCopyComplexList();
 	TestCopyComplexListEx();
+    Test();
 	return 0;
 }

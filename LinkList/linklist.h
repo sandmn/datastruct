@@ -154,6 +154,10 @@ ComplexNode* CopyComplexList(ComplexNode* head);
 
 //复杂链表的复制(简单)
 ComplexNode* CopyComplexListEx(ComplexNode* head);
+
+//先打印倒数第k个节点之后的节点，在打印倒数第k个节点之前的节点
+LinkListNode *rotateRight(LinkListNode *head,int k);
+
 ////////////////////////////
 //头文件
 //////////////////////////s
