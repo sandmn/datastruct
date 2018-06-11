@@ -1,4 +1,5 @@
 
+//单链表的基本操作
 #include<stdio.h>
 #include<stdlib.h>
 #include"linklist.h"
