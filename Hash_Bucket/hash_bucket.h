@@ -23,6 +23,8 @@ typedef size_t (*HashFunc)(KeyType key);
 //定义哈希表
 typedef struct HashTable
 {
+    //若哈希桶上是一个不带头节点的链表，则数组的元素类型为HashElemNode*
+    //如果是一个带头节点的链表，则数组的元素类型为HashElemNode
     HashElemNode* data[HASHMAXSIZE];//哈希表中的数组元素定义
     size_t size;//哈希表的实际元素个数
     HashFunc func;//哈希函数
