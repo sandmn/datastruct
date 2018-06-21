@@ -26,3 +26,7 @@ void SeqStackPop(SeqStack* stack);
 
 //取栈顶元素,-1代表出错返回，0代表成功返回
 int SeqStackTop(SeqStack* stack,SeqStackType* value);
+
+
+//不借助另外的数据结构，只根据递归将栈中元素进行逆置
+void Reverse(SeqStack* stack);

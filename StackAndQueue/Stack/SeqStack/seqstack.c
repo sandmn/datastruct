@@ -94,6 +94,46 @@ int SeqStackTop(SeqStack* stack,SeqStackType* value)
     return 0;
 }
 
+void _Reverse(SeqStack* stack,SeqStackType data)
+{
+    if(stack->size == 0)
+    {
+        SeqStackPush(stack,data);
+        return;
+    }
+    SeqStackType tmp;
+    int ret = SeqStackTop(stack,&tmp);
+    SeqStackPop(stack);
+    _Reverse(stack,data);
+    SeqStackPush(stack,tmp);
+    return;
+}
+
+//不借助另外的数据结构，只根据递归将栈中元素进行逆置
+void Reverse(SeqStack* stack)
+{
+    //如果栈为空或者栈中只有一个元素，此时直接返回即可
+    if(stack->size == 0 || stack->size == 1)
+    {
+        return;
+    }
+
+    //如果栈中元素个数大于1
+    //首先出栈栈中元素只剩余一个
+    //然后，实现该函数
+    //1. 将最后一个元素出栈，
+    //2. 将上述出栈的元素都插入栈，
+    //3. 当栈为空时，再入栈1.中的最后一个元素
+    SeqStackType top;//保存倒数第二个数
+    int ret = SeqStackTop(stack,&top);
+    SeqStackPop(stack);
+    Reverse(stack);
+    //将最后一个数弹出并保存,然后将倒数第二个数插入栈中
+    _Reverse(stack,top);
+    //最后将原来的最后一个数插入到栈中
+
+}
+
 ///////////////////////////////////
 //以下为测试代码
 //////////////////////////////////
@@ -195,12 +235,28 @@ void TestTop()
     return;
 }
 
+void TestReverse()
+{
+    TEST_HANDLE;
+    SeqStack stack;
+    InitSeqStack(&stack);
+    SeqStackPush(&stack,'a');
+    SeqStackPush(&stack,'b');
+    SeqStackPush(&stack,'c');
+    SeqStackPush(&stack,'d');
+    SeqStackPrint(&stack,"打印栈");
+    Reverse(&stack);
+    SeqStackPrint(&stack,"逆置栈");
+    return;
+}
+
 int main()
 {
     TestInit();
     TestPush();
     TestPop();
     TestTop();
+    TestReverse();
     return 0;
 }
 
