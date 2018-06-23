@@ -86,6 +86,62 @@ void PostOrder(TreeNode* root)
     return;
 }
 
+//按层打印二叉树
+void PrintByLevelOrder(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        //空树
+        return;
+    }
+
+    //借助队列来完成层序遍历
+    SeqQueue queue;//定义一个顺序队列
+    SeqQueueInit(&queue);//初始化队列
+    
+    //1. 现将根节点的指针入队列
+    SeqQueuePush(&queue,root);
+    int ret;
+    SeqQueueType front;
+    while(1)
+    {
+        //2. 取队首元素，如果队列为空，说明已经遍历结束
+        ret = SeqQueueTop(&queue,&front);
+        if(ret == -1)
+        {
+            //队列已空，树已经遍历完
+            break;
+        }
+        int size = queue.size;
+        while(size--)
+        {
+            //2. 取队首元素，如果队列为空，说明已经遍历结束
+            ret = SeqQueueTop(&queue,&front);
+            if(ret == -1)
+            {
+                //队列已空，树已经遍历完
+                break;
+            }
+            //3. 打印队首元素
+            printf("%c ",front->data);
+            //4. 队首元素出对列
+            SeqQueuePop(&queue);
+            //5. 如果队首元素的左右节点非空，则将左右节点的指针入队
+            if(front->lchild != NULL)
+            {
+                SeqQueuePush(&queue,front->lchild);
+            }
+            if(front->rchild != NULL)
+            {
+                SeqQueuePush(&queue,front->rchild);
+            }
+        }
+        printf("\n");
+        //6. 循环2.～5.
+    }
+    return;
+}
+
 //层序遍历
 void LevelOrder(TreeNode* root)
 {
@@ -1704,6 +1760,34 @@ void TestTreeRebuild()
     return;
 }
 
+void TestPrintByLevelOrder()
+{
+    TEST_HANDLE;
+
+    TreeNode* root;
+    TreeInit(&root);
+
+    TreeNode* a = CreateNode('a');
+    TreeNode* b = CreateNode('b');
+    TreeNode* c = CreateNode('c');
+    TreeNode* d = CreateNode('d');
+    TreeNode* e = CreateNode('e');
+    TreeNode* f = CreateNode('f');
+    TreeNode* g = CreateNode('g');
+
+    a->lchild = b;
+    a->rchild = c;
+    b->lchild = d;
+    b->rchild = e;
+    e->rchild = f;
+    c->lchild = g;
+
+    PrintByLevelOrder(a);
+    printf("\n");
+    return;
+
+}
+
 int main()
 {
     TestInit();
@@ -1732,5 +1816,6 @@ int main()
     TestIsCompleteByPost();
     TestIsCompleteByLevel();
     TestTreeRebuild();
+    TestPrintByLevelOrder();
     return 0;
 }
