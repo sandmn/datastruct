@@ -84,3 +84,6 @@ int IsComplete(TreeNode* root);
 
 //利用先序和中序遍历结果还原一棵二叉树
 TreeNode* TreeRebuild(TreeType pre_order[],TreeType in_order[],size_t size);
+
+//判断一棵二叉树是否对称，对称就是该二叉树的镜像与其相同
+int isSymmetrical(TreeNode* root);

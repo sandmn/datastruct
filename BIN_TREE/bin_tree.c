@@ -699,21 +699,37 @@ void Swap(TreeNode** a,TreeNode** b)
     *b = tmp;
 }
 
+//求一棵树的镜像
 void TreeMirror(TreeNode* root)
 {
     if(root == NULL)
     {
-        //空树
         return;
     }
-
-    //先序遍历树的各节点，访问到一个节点，将该节点的左右孩子交换
-    //此时，访问操作为交换
+    //通过先序遍历二叉树
+    //此处的遍历操作变为交换该结点处的左右结点
+    //当遍历到一个结点时，交换左右孩子结点的值
+    //再接着遍历左右结点
     Swap(&root->lchild,&root->rchild);
     TreeMirror(root->lchild);
     TreeMirror(root->rchild);
     return;
 }
+//void TreeMirror(TreeNode* root)
+//{
+//    if(root == NULL)
+//    {
+//        //空树
+//        return;
+//    }
+//
+//    //先序遍历树的各节点，访问到一个节点，将该节点的左右孩子交换
+//    //此时，访问操作为交换
+//    Swap(&root->lchild,&root->rchild);
+//    TreeMirror(root->lchild);
+//    TreeMirror(root->rchild);
+//    return;
+//}
 //非递归求一棵树的镜像:将树的三种非递归遍历中的打印操作改为交换操作即可
 //这里采用层序遍历来实现非递归求镜像
 void TreeMirrorByLoop(TreeNode* root)
@@ -1120,6 +1136,68 @@ TreeNode* TreeRebuild(char pre_order[],char in_order[],size_t size)
 //    return _TreeRebuild(pre_order,size,&pre_order_index,in_order,in_order_left,in_order_right);
 //
 //}
+
+TreeNode*  CreateTree(TreeNode* root)
+{
+    //如果二叉树为空
+    if(root == NULL)
+    {
+        return NULL;
+    }
+    //如果二叉树不为空，则遍历到一个结点，创建该结点
+   TreeNode* rootmirror =  CreateNode(root->data);
+   if(root->lchild != NULL)
+   {
+       rootmirror->lchild = CreateTree(root->lchild);
+   }
+   if(root->rchild != NULL)
+   {
+       rootmirror->rchild = CreateTree(root->rchild);
+   }
+   return rootmirror;
+
+}
+
+//判断两棵树是否相同
+int isequal(TreeNode* root1,TreeNode* root2)
+{
+    if(root1 == NULL && root2 ==NULL)
+    {
+        return 1;
+    }
+    if(root1->data == root2->data)
+    {
+        int ret1 = isequal(root1->lchild,root2->lchild);
+        int ret2 = isequal(root1->rchild,root2->rchild);
+        if(ret1 == 1 && ret2 == 1)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
+//判断一棵二叉树是否对称，对称就是该二叉树的镜像与其相同
+int isSymmetrical(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        return 1;
+    }
+    //先原样创建一棵二叉树
+    TreeNode* rootmirror = CreateTree(root);
+    //将新创建的二叉树转换为其镜像
+    TreeMirror(rootmirror);
+    //判断原二叉树与镜像是否相同
+    return isequal(root,rootmirror);
+
+}
 ///////////////////////////////////////
 //测试代码
 ///////////////////////////////////////
@@ -1788,6 +1866,33 @@ void TestPrintByLevelOrder()
 
 }
 
+void TestisSymmetrical()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    TreeNode* a = CreateNode('a');
+    TreeNode* b = CreateNode('b');
+    TreeNode* c = CreateNode('b');
+    TreeNode* d = CreateNode('d');
+    TreeNode* e = CreateNode('d');
+  //  TreeNode* f = CreateNode('f');
+  //  TreeNode* g = CreateNode('g');
+
+    a->lchild = b;
+    a->rchild = c;
+    b->lchild = d;
+  //  b->rchild = e;
+  //  e->rchild = f;
+    c->rchild = e;
+
+    int ret = isSymmetrical(a);
+    printf("expect 1,actually %d\n",ret);
+    printf("\n");
+    return;
+    
+}
 int main()
 {
     TestInit();
@@ -1817,5 +1922,6 @@ int main()
     TestIsCompleteByLevel();
     TestTreeRebuild();
     TestPrintByLevelOrder();
+    TestisSymmetrical();
     return 0;
 }
