@@ -86,4 +86,9 @@ int IsComplete(TreeNode* root);
 TreeNode* TreeRebuild(TreeType pre_order[],TreeType in_order[],size_t size);
 
 //判断一棵二叉树是否对称，对称就是该二叉树的镜像与其相同
+//e额外创建一棵二叉树
 int isSymmetrical(TreeNode* root);
+
+//判断一棵二叉树是否对称，对称就是该二叉树的镜像与其相同
+//不额外创建二叉树
+int isSymmetricalEx(TreeNode* root);
