@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 typedef char LinkListType;
 
 //定义链表结点结构体
