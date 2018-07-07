@@ -1,7 +1,4 @@
-
-//顺序表的基本操作
 #include "seqlist.h"
-
 
 void SeqListInit(SeqList *seqlist)
 {
@@ -171,11 +168,11 @@ void SeqListSet(SeqList *seqlist,int Pos,SeqListType value)
 		return;
 	}
 
-	if(seqlist->size == 0)
-	{
-		//顺序表已空
-		return;
-	}
+//	if(seqlist->size == 0)
+//	{
+//		//顺序表已空
+//		return;
+//	}
 	
 	if(Pos < 0 || Pos > seqlist->size - 1)
 	{
@@ -216,6 +213,7 @@ void SeqListFind(SeqList *seqlist,SeqListType value,int *Pos)
 
 void SeqListErase(SeqList *seqlist,int Pos)
 {
+
 	if(seqlist == NULL)
 	{
 		//非法输入
@@ -223,7 +221,7 @@ void SeqListErase(SeqList *seqlist,int Pos)
 	}
 
 	if(seqlist->size == 0)
-	{
+	{ 
 		//顺序表为空
 		return;
 	}
@@ -293,18 +291,14 @@ void SeqListRemoveAllEx(SeqList* seqlist, SeqListType to_delete)
 		return;
 	}
 
-	//统计要删除元素的重复个数
-//	SeqListType tmp[seqlist->size];
 	int count = 0;
 	int cur = 0;
-	for(cur = 0;cur < seqlist->size;++cur)
+	int size = seqlist->size;
+	for(cur = 0;cur <seqlist->size;++cur)
 	{
 		if(seqlist->data[cur] != to_delete)
 		{
 			seqlist->data[count++] = seqlist->data[cur];
-
-		//	tmp[count] = cur;//存储要删除元素的下标
-		//	count++;
 		}
 		else
 		{
@@ -312,15 +306,6 @@ void SeqListRemoveAllEx(SeqList* seqlist, SeqListType to_delete)
 		}
 	}
 	return;
-
-//	//根据数组中的下标一个个删除
-//	cur = 0;
-//	for(cur = 0;cur < count;++cur)
-//	{
-//		SeqListRemove(seqlist,to_delete);
-//	}
-
-
 }
 
 //统计顺序表中的元素个数
@@ -372,10 +357,10 @@ void SeqListBubbleSort(SeqList* seqlist)
 		return;
 	}
 
-	int count = 0;
+	int count = 0;//冒泡的趟数
 	for(count = 0;count < seqlist->size-1;++count)
 	{
-		int cur = 0;
+		int cur = 0;//当前的位置变量
 		int flag = 0;
 		for(cur = 0;cur < seqlist->size-count-1;++cur)
 		{
@@ -476,12 +461,6 @@ void SeqListSelectSort(SeqList* seqlist,Cmp cmp)
 #include<stdio.h>
 //#include<stdlib.h>
 #define TEST_HANDLE printf("\n================%s==============\n",__FUNCTION__)
-
-void TestInit()
-{
-	TEST_HANDLE;
-	SeqList seqlist;
-	SeqListInit(&seqlist);
 
 void TestInit()
 {
@@ -699,17 +678,22 @@ void TestRemoveAllEx()
 	TEST_HANDLE;
 	SeqList seqlist;
 	SeqListInit(&seqlist);
-	SeqListPushFront(&seqlist,'a');
-	SeqListPushFront(&seqlist,'b');
-	SeqListPushFront(&seqlist,'a');
-	SeqListPushFront(&seqlist,'d');
+	SeqListPushBack(&seqlist,'a');
+	SeqListPushBack(&seqlist,'b');
+	SeqListPushBack(&seqlist,'a');
+	SeqListPushBack(&seqlist,'d');
+
+	SeqListPushBack(&seqlist,'e');
+	SeqListPushBack(&seqlist,'f');
+	SeqListPushBack(&seqlist,'g');
+	SeqListPushBack(&seqlist,'h');
 	SeqListPrint(&seqlist,"已插入的四个元素\n");
 
 	SeqListRemoveAll(&seqlist,'a');
 	SeqListPrint(&seqlist,"删除所有的a\n");
 
-	SeqListRemoveAll(&seqlist,'m');
-	SeqListPrint(&seqlist,"删除所有的m\n");
+	SeqListRemoveAll(&seqlist,'c');
+	SeqListPrint(&seqlist,"删除所有的c\n");
 	return;
 }
 void TestSize()
@@ -804,6 +788,12 @@ int main()
 {
 	TestInit();
 	TestPushBack();
+	TestPopBack();
+	TestPushFront();
+	TestPopFront();
+	TestInsert();
+	TestGet();
+	TestSet();
 	TestErase();
 	TestRemove();
 	TestRemoveAll();
