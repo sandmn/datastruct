@@ -52,5 +52,7 @@ void DlinklistRemoveAll(DlinkNode* head,DlinklistType to_delete_value);
 //销毁链表
 void DestoryDlinklist(DlinkNode** phead);
 
+
+
 //统计双向链表的长度
 int DlinklistSize(DlinkNode*head);
