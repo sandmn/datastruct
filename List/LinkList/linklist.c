@@ -921,64 +921,122 @@ void LinkListReversePrint(LinkListNode* head)
 		return;
 	}
 
-	//合并两个有序链表使之继续有序
-	LinkListNode* LinkListMerge(LinkListNode* head1,LinkListNode* head2)
-	{
-		if(head1 == NULL)
-		{
-			//链表1为空
-			return head2;
-		}
-		if(head2 == NULL)
-		{
-			//链表2为空
-			return head1;
-		}
-		LinkListNode* cur1 = head1;//cur1用于遍历链表1
-		LinkListNode* cur2 = head2;//cur2用于遍历链表2
-		LinkListNode* new_head = NULL;//新链表的头指针
-		LinkListNode* new_tail = NULL;//新链表的尾指针
-		while(cur1 != NULL && cur2 != NULL)
-		{
-			if(cur1->data < cur2->data)//cur1的数据域小
-			{
-				if(new_tail == NULL)//如果新链表为空
-				{
-					new_head  = cur1;//头尾指针直接指向数据小的节点
-					new_tail  = cur1;
-				}
-				else//如果不为空
-				{
-					new_tail->next = cur1;//使数据小的节点插入新链表的尾部
-					new_tail = new_tail->next;//尾指针后移
-				}
-				cur1 = cur1->next;//cur1后移
-			}
-			else//cur1的数据不小于cur2的，重复与上述类似的操作
-			{
-				if(new_tail == NULL)
-				{
-					new_head = cur2;
-					new_tail = cur2;
-				}
-				else
-				{
-					new_tail->next = cur2;
-					new_tail = new_tail->next;
-				}
-				cur2 = cur2->next;
-			}
-		}
-		if(cur1 != NULL)//如果cur1未遍历完，将cur1的剩余节点插入新链表的尾部
-		{
-			new_tail->next = cur1;
-		}
-		else
-		{
-			new_tail->next = cur2;
-		}
-		return new_head;
-	}
+LinkListNode* LinkListMerge(LinkListNode* head1,LinkListNode* head2)
+{
+    if(head1 == NULL)
+    {
+        return head2;
+    }
+    if(head2 == NULL)
+    {
+        return head1;
+    }
+    LinkListNode* cur1 = head1;
+    LinkListNode* cur2 = head2;
+    LinkListNode* new_head = NULL;
+    LinkListNode* new_tail = NULL;
+    while(cur1 != NULL && cur2 != NULL)
+    {
+        if(cur1->data < cur2->data)
+        {
+            if(new_head == NULL)
+            {
+                new_head = new_tail = cur1;
+                cur1 = cur1->next;
+            }
+            else
+            {
+                new_tail->next = cur1;
+                new_tail = new_tail->next;
+                cur1 = cur1->next;
+            }
+        }
+        else
+        {
+            if(new_head == NULL)
+            {
+                new_head = new_tail = cur2;
+                cur2 = cur2->next;
+            }
+            else
+            {
+                new_tail->next = cur2;
+                new_tail = new_tail->next;
+                cur2 = cur2->next;
+            }
+
+        }
+    }
+    if(cur1 != NULL)
+    {
+        new_tail->next = cur1;
+    }
+    else
+    {
+        new_tail->next = cur2;
+    }
+    return new_head;
+}
+
+
+	////合并两个有序链表使之继续有序
+	//LinkListNode* LinkListMerge(LinkListNode* head1,LinkListNode* head2)
+	//{
+	//	if(head1 == NULL)
+	//	{
+	//		//链表1为空
+	//		return head2;
+	//	}
+	//	if(head2 == NULL)
+	//	{
+	//		//链表2为空
+	//		return head1;
+	//	}
+	//	LinkListNode* cur1 = head1;//cur1用于遍历链表1
+	//	LinkListNode* cur2 = head2;//cur2用于遍历链表2
+	//	LinkListNode* new_head = NULL;//新链表的头指针
+	//	LinkListNode* new_tail = NULL;//新链表的尾指针
+	//	while(cur1 != NULL && cur2 != NULL)
+	//	{
+	//		if(cur1->data < cur2->data)//cur1的数据域小
+	//		{
+	//			if(new_tail == NULL)//如果新链表为空
+	//			{
+	//				new_head  = cur1;//头尾指针直接指向数据小的节点
+	//				new_tail  = cur1;
+	//			}
+	//			else//如果不为空
+	//			{
+	//				new_tail->next = cur1;//使数据小的节点插入新链表的尾部
+	//				new_tail = new_tail->next;//尾指针后移
+	//			}
+	//			cur1 = cur1->next;//cur1后移
+	//		}
+	//		else//cur1的数据不小于cur2的，重复与上述类似的操作
+	//		{
+	//			if(new_tail == NULL)
+	//			{
+	//				new_head = cur2;
+	//				new_tail = cur2;
+	//			}
+	//			else
+	//			{
+	//				new_tail->next = cur2;
+	//				new_tail = new_tail->next;
+	//			}
+	//			cur2 = cur2->next;
+	//		}
+	//	}
+	//	if(cur1 != NULL)//如果cur1未遍历完，将cur1的剩余节点插入新链表的尾部
+	//	{
+	//		new_tail->next = cur1;
+	//	}
+	//	else
+	//	{
+	//		new_tail->next = cur2;
+	//	}
+	//	return new_head;
+	//}
 
 	//查找中间节点，只遍历一次
 	LinkListNode* LinkListFindMidNode(LinkListNode* head)
@@ -1705,6 +1763,50 @@ LinkListNode *rotateRight(LinkListNode *head, int k)
     return node_k;
 }
 
+//将链表的连续两个节点进行交换，不能修改链表的值
+LinkListNode *swapPairs(LinkListNode *head)
+{
+    if(head == NULL)
+    {
+        return NULL;
+    }
+    //定义新链表的头指针，初始为原链表的头指针
+    LinkListNode* new_head = head;
+    //如果链表中不止有一个元素，则需要修改新链表指针的指向
+    if(head->next != NULL)
+    {
+        new_head = head->next;
+    }
+    //保存当前元素
+    LinkListNode* cur = head;
+    //保存上一个元素
+    LinkListNode* prev = head;
+    //保存cur之后要移动的元素
+    LinkListNode* delete = head;
+    //保存delete之后的元素
+    LinkListNode* next = NULL;
+    //当前元素为空，说明元素个数为双数
+    //当前元素的下一个元素为空，说明元素个数为单数
+    while(cur != NULL && cur->next != NULL)
+    {
+        //保存要移动的元素
+        delete = cur->next;
+        //保存要移动元素的下一个元素
+        next = delete->next;
+        //对指针的指向进行修改
+        cur->next =next;
+        delete->next = cur;
+        cur = cur->next;
+        //如果操作的不是前两个元素，需要链接前一个元素
+        //在修改前一个元素指针
+        if(delete->next != head)
+        {
+            prev->next = delete;
+            prev = delete->next;
+        }
+    }
+    return new_head;
+}
 ////////////////////////////////////
 //测试代码
 ///////////////////////////////////
@@ -2780,6 +2882,24 @@ void Test()
 
 }
 
+void TestSwapPairs()
+{
+    TEST_HANDLE;
+    LinkListNode* head;
+    LinkListInit(&head);
+
+    LinkListPushBack(&head,'a');
+    LinkListPushBack(&head,'b');
+    LinkListPushBack(&head,'c');
+    LinkListPushBack(&head,'d');
+    LinkListPushBack(&head,'e');
+
+    LinkListNode* h = swapPairs(head);
+    LinkListPrint(h,"打印转换后的链表");
+    return;
+
+}
+
 int main()
 {
 	TestInit();
@@ -2823,5 +2943,6 @@ int main()
 	TestCopyComplexList();
 	TestCopyComplexListEx();
     Test();
+    TestSwapPairs();
 	return 0;
 }
