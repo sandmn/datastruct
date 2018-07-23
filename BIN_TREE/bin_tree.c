@@ -142,6 +142,37 @@ void PrintByLevelOrder(TreeNode* root)
     return;
 }
 
+//二叉树的层序遍历
+//void LevelOrder(TreeNode* root)
+//{
+//    if(root == NULL)
+//    {
+//        return;
+//    }
+//    SeqQueue queue;
+//    SeqQueueInit(&queue);
+//    SeqQueuePush(&queue,root);
+//    TreeNode* front = NULL;
+//    while(1)
+//    {
+//        int ret = SeqQueueTop(&queue,&front);
+//        if(ret == -1)
+//        {
+//            return;
+//        }
+//        printf("%c ",front->data);
+//        SeqQueuePop(&queue);
+//        if(front->lchild != NULL)
+//        {
+//            SeqQueuePush(&queue,front->lchild);
+//        }
+//        if(front->rchild != NULL)
+//        {
+//            SeqQueuePush(&queue,front->rchild);
+//        }
+//    }
+//}
+//
 //层序遍历
 void LevelOrder(TreeNode* root)
 {
@@ -501,6 +532,40 @@ TreeNode* RChild(TreeNode* node)
 /////////////////////////////////
 
 //非递归实现树的先序遍历
+//void TreePreOrderByLoop(TreeNode* root)
+//{
+//    if(root == NULL)
+//    {
+//        return;
+//    }
+//    SeqStack stack;
+//    InitSeqStack(&stack);
+//    SeqStackPush(&stack,root);
+//    while(1)
+//    {
+//        TreeNode* top = NULL;
+//        int ret = SeqStackTop(&stack,&top);
+//        if(ret == -1)
+//        {
+//            break;
+//        }
+//        printf("%c ",top->data);
+//        SeqStackPop(&stack);
+//        if(top->rchild != NULL)
+//        {
+//            SeqStackPush(&stack,top->rchild);
+//        }
+//        if(top->lchild != NULL)
+//        {
+//            SeqStackPush(&stack,top->lchild);
+//        }
+//    }
+//    return;
+//}
+//
+
+
+//非递归实现树的先序遍历
 void TreePreOrderByLoop(TreeNode* root)
 {
     if(root == NULL)
@@ -543,49 +608,121 @@ void TreePreOrderByLoop(TreeNode* root)
     return;
 }
 
-
 //非递归实现树的中序遍历
 void TreeInOrderByLoop(TreeNode* root)
 {
-    if(root ==  NULL)
+    if(root == NULL)
     {
-        //空树
         return;
     }
-
     SeqStack stack;
     InitSeqStack(&stack);
 
-    //1. 定义cur为当前指针变量，初始指向root；
+    TreeNode* top = NULL;
     TreeNode* cur = root;
-
+    int ret = 1;
     while(1)
     {
-        //2. 当cur不为空时，
         while(cur != NULL)
         {
-            //   a)将cur入栈，
             SeqStackPush(&stack,cur);
-            //   b)并使cur指向cur的左子树，
             cur = cur->lchild;
-            //   c)循环a)b)
         }
-        //3. 当cur为空时，取栈顶元素，使cur指向栈顶元素
-        int ret = SeqStackTop(&stack,&cur);
-        //  a)栈顶元素为空时，遍历结束
+        ret = SeqStackTop(&stack,&top);
+        if(ret == -1)
+        {
+            break;
+        }
+        printf("%c ",top->data);
+        SeqStackPop(&stack);
+        if(top->rchild != NULL)
+        {
+            cur = top->rchild;
+
+        }
+    }
+    return;
+}
+
+////非递归实现树的中序遍历
+//void TreeInOrderByLoop(TreeNode* root)
+//{
+//    if(root ==  NULL)
+//    {
+//        //空树
+//        return;
+//    }
+//
+//    SeqStack stack;
+//    InitSeqStack(&stack);
+//
+//    //1. 定义cur为当前指针变量，初始指向root；
+//    TreeNode* cur = root;
+//
+//    while(1)
+//    {
+//        //2. 当cur不为空时，
+//        while(cur != NULL)
+//        {
+//            //   a)将cur入栈，
+//            SeqStackPush(&stack,cur);
+//            //   b)并使cur指向cur的左子树，
+//            cur = cur->lchild;
+//            //   c)循环a)b)
+//        }
+//        //3. 当cur为空时，取栈顶元素，使cur指向栈顶元素
+//        int ret = SeqStackTop(&stack,&cur);
+//        //  a)栈顶元素为空时，遍历结束
+//        if(ret == -1)
+//        {
+//            return;
+//        }
+//        //  b)栈顶元素不为空时，访问栈顶元素，并出栈
+//        printf("%c ",cur->data);
+//        SeqStackPop(&stack);
+//
+//        //4. 使cur指向cur的右子树
+//        cur = cur->rchild;
+//        //5.循环2~4
+//    }
+//    return;
+//}
+
+//非递归实现树的后序遍历
+void TreePostOrderByLoop(TreeNode* root)
+{
+    if(root == NULL)
+    {
+        return;
+    }
+    SeqStack stack;
+    InitSeqStack(&stack);
+    TreeNode* pre = NULL;
+    TreeNode* cur = root;
+    TreeNode* top = NULL;
+    while(1)
+    {
+        while(cur != NULL)
+        {
+            SeqStackPush(&stack,cur);
+            cur = cur->lchild;
+        }
+        int ret = SeqStackTop(&stack,&top);
         if(ret == -1)
         {
             return;
         }
-        //  b)栈顶元素不为空时，访问栈顶元素，并出栈
-        printf("%c ",cur->data);
-        SeqStackPop(&stack);
-
-        //4. 使cur指向cur的右子树
-        cur = cur->rchild;
-        //5.循环2~4
+        if(top->rchild == NULL || top->rchild == pre)
+        {
+            printf("%c ",top->data);
+            pre = top;
+            SeqStackPop(&stack);
+        }
+        else
+        {
+            cur = top->rchild;
+        }
     }
-    return;
 }
 
 ////非递归实现树的后序遍历
@@ -654,60 +791,60 @@ void TreeInOrderByLoop(TreeNode* root)
 //    return;
 //}
 
-//非递归实现树的后序遍历
-void TreePostOrderByLoop(TreeNode* root)
-{
-    if(root ==  NULL)
-    {
-        return;
-    }
-
-    SeqStack stack;
-    InitSeqStack(&stack);
-
-
-    //1. 定义cur为当前指针变量，初始为root
-    TreeNode* cur = root;
-    TreeNode* pre = NULL;
-
-    while(1)
-    {
-        //2. 当cur不为空时，
-        while(cur != NULL)
-        {
-            //  a) 将cur入栈
-            SeqStackPush(&stack,cur);
-            //  b）cur指向cur的左孩子
-            cur = cur->lchild;
-            //  c) 循环a)b)
-        }
-        //3. 当cur为空时，取栈顶元素，由cur指向
-        TreeNode* top = NULL;
-        int ret = SeqStackTop(&stack,&top);
-        //4. 如果栈顶元素为空，则遍历完程，直接返回即可
-        if(ret == -1)
-        {
-            return;
-        }
-        //5. 若栈顶元素不为空
-        //  1）如果栈顶元素的右孩子为空或栈顶元素的右孩子与上一个访问的元素相同，
-        //     则访问栈顶元素，并出栈，然后继续回到3取栈顶元素进行判断
-        if(top->rchild == NULL || top->rchild == pre)
-        {
-            printf("%c ",top->data);
-            pre = top;
-            SeqStackPop(&stack);
-
-        }
-        //  2） 如果不为1)，则不做处理，使cur指向cur的右孩子
-        else{
-            cur = top->rchild;
-        }
-
-        //6. 循环2～5
-    }
-    return;
-}
+////非递归实现树的后序遍历
+//void TreePostOrderByLoop(TreeNode* root)
+//{
+//    if(root ==  NULL)
+//    {
+//        return;
+//    }
+//
+//    SeqStack stack;
+//    InitSeqStack(&stack);
+//
+//
+//    //1. 定义cur为当前指针变量，初始为root
+//    TreeNode* cur = root;
+//    TreeNode* pre = NULL;
+//
+//    while(1)
+//    {
+//        //2. 当cur不为空时，
+//        while(cur != NULL)
+//        {
+//            //  a) 将cur入栈
+//            SeqStackPush(&stack,cur);
+//            //  b）cur指向cur的左孩子
+//            cur = cur->lchild;
+//            //  c) 循环a)b)
+//        }
+//        //3. 当cur为空时，取栈顶元素，由cur指向
+//        TreeNode* top = NULL;
+//        int ret = SeqStackTop(&stack,&top);
+//        //4. 如果栈顶元素为空，则遍历完程，直接返回即可
+//        if(ret == -1)
+//        {
+//            return;
+//        }
+//        //5. 若栈顶元素不为空
+//        //  1）如果栈顶元素的右孩子为空或栈顶元素的右孩子与上一个访问的元素相同，
+//        //     则访问栈顶元素，并出栈，然后继续回到3取栈顶元素进行判断
+//        if(top->rchild == NULL || top->rchild == pre)
+//        {
+//            printf("%c ",top->data);
+//            pre = top;
+//            SeqStackPop(&stack);
+//
+//        }
+//        //  2） 如果不为1)，则不做处理，使cur指向cur的右孩子
+//        else{
+//            cur = top->rchild;
+//        }
+//
+//        //6. 循环2～5
+//    }
+//    return;
+//}
 
 //求一棵树的镜像
 
