@@ -395,25 +395,45 @@ size_t TreeKLevelSize(TreeNode* root,int K)
     return TreeKLevelSize(root->lchild,K-1) + TreeKLevelSize(root->rchild,K-1);
 }
 
-//求二叉树的深度或高度
+
+//求树的深度
 size_t TreeHeight(TreeNode* root)
 {
     if(root == NULL)
     {
-        //空树
         return 0;
     }
-    if(root->lchild == NULL && root->rchild == NULL)
-    {
-        return 1;
-    }
-    //统计左子树的深度
     size_t lheight = TreeHeight(root->lchild);
-    //统计右子树的深度
     size_t rheight = TreeHeight(root->rchild);
-    //左右子树的最大值加1
-    return (lheight > rheight)? 1+lheight : 1+rheight;
+    if(lheight > rheight)
+    {
+        return lheight + 1;
+    }
+    else 
+    {
+        return rheight + 1;
+    }
 }
+
+////求二叉树的深度或高度
+//size_t TreeHeight(TreeNode* root)
+//{
+//    if(root == NULL)
+//    {
+//        //空树
+//        return 0;
+//    }
+//    if(root->lchild == NULL && root->rchild == NULL)
+//    {
+//        return 1;
+//    }
+//    //统计左子树的深度
+//    size_t lheight = TreeHeight(root->lchild);
+//    //统计右子树的深度
+//    size_t rheight = TreeHeight(root->rchild);
+//    //左右子树的最大值加1
+//    return (lheight > rheight)? 1+lheight : 1+rheight;
+//}
 //在二叉树中查找节点(给定数值，求对应节点的指针，假设二叉树中的节点是不重复的)
 //空间复杂度为O(n),时间复杂度为O(n),因为n个节点，需要比较n次，递归n次
 TreeNode* TreeFind(TreeNode* root,TreeType to_find)
@@ -1245,6 +1265,37 @@ int isSymmetricalEx(TreeNode* root)
     //如果根节点不为空，则判断根节点的左右子树是否对称
     return isTreeSymmetrical(root->lchild,root->rchild);
 }
+
+void _PrintPreOrder(TreeType* arr,TreeNode* root,int* index)
+{
+    if(root == NULL)
+    {
+        return;
+    }
+    arr[*index] = root->data;
+    (*index)++;
+    if(root->lchild != NULL)
+    {
+        _PrintPreOrder(arr,root->lchild,index);
+    }
+    if(root->rchild != NULL)
+    {
+        _PrintPreOrder(arr,root->rchild,index);
+    }
+    return;    
+}
+
+//将一棵二叉树的先序序列存放在一个数组中（递归实现）
+TreeType* PrintPreOrder(TreeNode* root)
+{
+    TreeType* arr = (TreeType*)malloc(10*sizeof(TreeType));
+    memset(arr,0,sizeof(arr));
+    int index = 0;
+    _PrintPreOrder(arr,root,&index);
+    return arr;
+}
+
+
 ///////////////////////////////////////
 //测试代码
 ///////////////////////////////////////
@@ -1514,6 +1565,11 @@ void TestHeight()
     root = TreeCreate(arr,strlen(arr),'#');
     count = TreeHeight(root);
     printf("expect 4,actually %d\n",count);
+
+    char arr1[] = "a##";
+    root = TreeCreate(arr1,strlen(arr),'#');
+    count = TreeHeight(root);
+    printf("expect 1,actually %d\n",count);
 }
 
 void TestFind()
@@ -1965,7 +2021,35 @@ void TestisSymmetricalEx()
     printf("expect 1,actually %d\n",ret);
     printf("\n");
     return;
-    
+}
+void TestPrintPreOrder()
+{
+    TEST_HANDLE;
+    TreeNode* root;
+    TreeInit(&root);
+
+    TreeNode* a = CreateNode('a');
+    TreeNode* b = CreateNode('b');
+    TreeNode* c = CreateNode('b');
+    TreeNode* d = CreateNode('d');
+    TreeNode* e = CreateNode('d');
+
+    a->lchild = b;
+    a->rchild = c;
+    b->lchild = d;
+    c->rchild = e;
+
+    PreOrder(a);
+    printf("\n");
+
+    TreeType* arr = PrintPreOrder(a);
+    int i = 0;
+    for(;i < 10;i++)
+    {
+        printf("%c ",arr[i]);
+    }
+    printf("\n");
+    return;
 }
 int main()
 {
@@ -1998,5 +2082,6 @@ int main()
     TestPrintByLevelOrder();
     TestisSymmetrical();
     TestisSymmetricalEx();
+    TestPrintPreOrder();
     return 0;
 }

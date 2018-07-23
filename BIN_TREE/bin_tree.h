@@ -92,3 +92,7 @@ int isSymmetrical(TreeNode* root);
 //判断一棵二叉树是否对称，对称就是该二叉树的镜像与其相同
 //不额外创建二叉树
 int isSymmetricalEx(TreeNode* root);
+
+//将一棵二叉树的先序序列存放在一个数组中(递归实现)
+TreeType* PrintPreOrder(TreeNode* root);
+
