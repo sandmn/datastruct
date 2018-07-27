@@ -566,77 +566,182 @@ int Pattern2(int arr[],int left,int right)
 }
 
 
-//交换法
+//基准值为带排序序列的第一个元素，则后面的变量先开始往前找
 int Pattern1(int arr[],int left,int right)
 {
-    //该函数用于给基准值找一个合适的位置，
-    //使得在基准值之前的元素都小于等于基准值
-    //在基准值之后的元素都大于等于基准值
-    //所以要先从前往后遍历使数组前面的元素小于等于基准值
-    //从后往前遍历使后面的元素大于等于基准值
-    //当两个遍历索引相遇时，一定找到了小于基准值和大于据准值元素的分界点
-    //此时将分界点处的值替换为基准值即可保证上述的要求
-
-
-    //如果数组只有一个元素，则基准值直接放置在起始位置即可
     if(right - left <= 1)
     {
-        return left;
+        return right;
     }
-    //从起始位置开始往后遍历寻找大于基准值的数组元素
-    int left_index = left;
-    int right_index = right - 1;
-    //从末尾位置开始往前遍历寻找小于基准值的数组元素
-    //将基准值设置为所在区间的最后一个元素值
-    int basic_value = arr[right - 1];
-
-    while(left_index < right_index)
+    int back = right - 1;
+    int front = left;
+    int basic_value = arr[left];
+    while(front < back)
     {
-        //如果从前往后找到大于基准值的元素，就停下来
-        while(left_index < right_index && arr[left_index] <= basic_value)
+        while(front < back && arr[back] >= basic_value)
         {
-            left_index++;
+            back--;
         }
-        //如果从后往前找到小于基准值的元素，就停下来
-        while(left_index < right_index && arr[right_index] >= basic_value)
+        while(front < back && arr[front] <= basic_value)
         {
-            right_index--;
+            front++;
         }
-        //交换停下来的两个值
-        Swap(&arr[left_index],&arr[right_index]);
+        if(front < back)
+        {
+            Swap(&arr[front],&arr[back]);
+        }
+        else
+        {
+            break;
+        }
     }
-    Swap(&arr[left_index],&arr[right - 1]);
-    return left_index;
+    Swap(&arr[back],&arr[left]);
+    return back;
 }
 
-//递归函数
+
+//基准值为带排序序列的最后一个元素：则前面的变量开始往后找
+//int Pattern1(int arr[],int left,int right)
+//{
+//    if(right - left <= 1)
+//    {
+//        return left;
+//    }
+//    //取基准值为最后一个元素
+//    int basic_value = arr[right - 1];
+//    //定义两个变量，一个从前往后找大于等于基准值的元素
+//    //另一个从后往前找小于等于基准值的元素
+//    int front = left;
+//    int back = right - 1;
+//    //当front与back相等的时候，查找结束，此时二者一定指向大于基准值的元素
+//    while(front < back)
+//    {
+//        while(front < back && arr[front] <= basic_value)
+//        {
+//            front++;
+//        }
+//        while(front < back && arr[back] >= basic_value)
+//        {
+//            back--;
+//        }
+//        if(front < back)
+//        {
+//            //交换两个元素
+//            Swap(&arr[front],&arr[back]);
+//        }
+//        else
+//        {
+//            break;
+//        }
+//    }
+//    //因为最后front处的值一定大于基准值，所以将此处的值与基准值进行交换
+//    Swap(&arr[front],&arr[right - 1]);
+//    return front;
+//}
+
 void _QuickSort(int arr[],int left,int right)
 {
+    //排序数组中最多只有一个元素，则不用进行排序了
     if(arr == NULL || right - left <= 1)
     {
         return;
     }
-    //先找一个基准值，这里设置数组最后一个元素基准值
-    //找到放置基准值的位置，使得在该位置之前的数组元素小于等于基准值
-    //在该位置之后的数组元素大于等于基准值
-
-    //int mid = Pattern1(arr,left,right);
-    int mid = Pattern2(arr,left,right);
-   
+    //对区间[left,right)中的元素利用交换法进行排序
+    //在交换排序中，取一个基准值，使基准值之前的元素小于等于基准值，基准值之后的元素大于等于基准值
+    //然后返回基准值所在的位置
+    int mid = Pattern1(arr,left,right);
+    //然后对基准值之前的元素再次进行交换排序
     _QuickSort(arr,left,mid);
+    //对基准值之后的元素进行交换排序
     _QuickSort(arr,mid + 1,right);
+
 }
-void QuickSort(int arr[],int size)
+
+//快速排序
+void QuickSort(int arr[],int n)
 {
-    if(arr == NULL || size <= 1)
+    if(arr == NULL || n <= 1)
     {
         return;
     }
+    //对整个区间的元素进行快速排序
     int left = 0;
-    int right = size;
-    
+    int right = n;
     _QuickSort(arr,left,right);
+    return;
 }
+
+//交换法
+//int Pattern1(int arr[],int left,int right)
+//{
+//    //该函数用于给基准值找一个合适的位置，
+//    //使得在基准值之前的元素都小于等于基准值
+//    //在基准值之后的元素都大于等于基准值
+//    //所以要先从前往后遍历使数组前面的元素小于等于基准值
+//    //从后往前遍历使后面的元素大于等于基准值
+//    //当两个遍历索引相遇时，一定找到了小于基准值和大于据准值元素的分界点
+//    //此时将分界点处的值替换为基准值即可保证上述的要求
+//
+//
+//    //如果数组只有一个元素，则基准值直接放置在起始位置即可
+//    if(right - left <= 1)
+//    {
+//        return left;
+//    }
+//    //从起始位置开始往后遍历寻找大于基准值的数组元素
+//    int left_index = left;
+//    int right_index = right - 1;
+//    //从末尾位置开始往前遍历寻找小于基准值的数组元素
+//    //将基准值设置为所在区间的最后一个元素值
+//    int basic_value = arr[right - 1];
+//
+//    while(left_index < right_index)
+//    {
+//        //如果从前往后找到大于基准值的元素，就停下来
+//        while(left_index < right_index && arr[left_index] <= basic_value)
+//        {
+//            left_index++;
+//        }
+//        //如果从后往前找到小于基准值的元素，就停下来
+//        while(left_index < right_index && arr[right_index] >= basic_value)
+//        {
+//            right_index--;
+//        }
+//        //交换停下来的两个值
+//        Swap(&arr[left_index],&arr[right_index]);
+//    }
+//    Swap(&arr[left_index],&arr[right - 1]);
+//    return left_index;
+//}
+
+////递归函数
+//void _QuickSort(int arr[],int left,int right)
+//{
+//    if(arr == NULL || right - left <= 1)
+//    {
+//        return;
+//    }
+//    //先找一个基准值，这里设置数组最后一个元素基准值
+//    //找到放置基准值的位置，使得在该位置之前的数组元素小于等于基准值
+//    //在该位置之后的数组元素大于等于基准值
+//
+//    //int mid = Pattern1(arr,left,right);
+//    int mid = Pattern2(arr,left,right);
+//   
+//    _QuickSort(arr,left,mid);
+//    _QuickSort(arr,mid + 1,right);
+//}
+//void QuickSort(int arr[],int size)
+//{
+//    if(arr == NULL || size <= 1)
+//    {
+//        return;
+//    }
+//    int left = 0;
+//    int right = size;
+//    
+//    _QuickSort(arr,left,right);
+//}
 
 ///////////////////////////
 //快速排序（非递归）
