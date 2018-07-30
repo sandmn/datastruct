@@ -1085,42 +1085,85 @@ LinkListNode* LinkListMerge(LinkListNode* head1,LinkListNode* head2)
 		return slow;
 	}
 
-	//查找倒数第k个节点，只遍历一次
-	LinkListNode* LinkListFindLastKNode(LinkListNode* head,int k)
-	{
-		if(head == NULL)
-		{
-			//空链表
-			return NULL;
-		}
-		LinkListNode* fast = head;//定义快指针
-		LinkListNode* slow = head;//定义满指针
-		int i =0;
-        //当k的值等于链表的长度如5时，在循环结束时，K = 5，且fast==NULL
-        //此时，倒数第5个节点正好是第一个节点
-        //所以不能用fast==NULL作为K大于链表元素个数的判断条件
-        //当k等于链表的元素个数以及小于元素的节点个数时，都会走到 i = K这一步
-        //但是当K大于元素节点个数时，不会走到i = K这一步，就退出循环了
-        //因此用i < K来判断K大于节点个数的情况
-		for(;i < k;i++)//使快指针先走k步
-		{
-			if(fast == NULL)//说明此时k大于等于链表的长度
-			{
-				break;
-			}
-			fast = fast->next;
-		}
-		if(i < k)//如果k大于链表的长度
-		{
-			return NULL;
-		}
-		while(fast != NULL)//再使快慢指针同时走，一次走一步，直到快指针走向结尾
-		{
-			fast = fast->next;
-			slow = slow->next;
-		}
-		return slow;
-	}
+//查找倒数第k个节点，只遍历一次
+LinkListNode* LinkListFindLastKNode(LinkListNode* head,int k)
+{
+    if(head == NULL)
+    {
+        return NULL;
+    }
+    //先统计链表中的节点个数
+    int count = 0;
+    LinkListNode* index = head;
+    while(index != NULL)
+    {
+        count++;
+        index = index->next;
+    }
+    //如果k的值大于链表的节点个数，则找不到
+    if(k > count)
+    {
+        return NULL;
+    }
+    //如果k的值等于链表的节点个数，则返回第一个节点
+    if(k == count)
+    {
+        return head;
+    }
+    //如果k的值小于链表的节点个数，则定义两个指针
+    //fast先走k步，然后两指针一次走一步
+    //当fast走到最后时，slow即指向倒数第k个节点
+    int i = 0;
+    LinkListNode* fast = head;
+    LinkListNode* slow = head;
+    for(i = 0;i < k;i++)
+    {
+        fast = fast->next;
+    }
+    while(fast != NULL)
+    {
+        fast = fast->next;
+        slow = slow->next;
+    }
+    return slow;
+}
+
+	////查找倒数第k个节点，只遍历一次
+	//LinkListNode* LinkListFindLastKNode(LinkListNode* head,int k)
+	//{
+	//	if(head == NULL)
+	//	{
+	//		//空链表
+	//		return NULL;
+	//	}
+	//	LinkListNode* fast = head;//定义快指针
+	//	LinkListNode* slow = head;//定义满指针
+	//	int i =0;
+    //    //当k的值等于链表的长度如5时，在循环结束时，K = 5，且fast==NULL
+    //    //此时，倒数第5个节点正好是第一个节点
+    //    //所以不能用fast==NULL作为K大于链表元素个数的判断条件
+    //    //当k等于链表的元素个数以及小于元素的节点个数时，都会走到 i = K这一步
+    //    //但是当K大于元素节点个数时，不会走到i = K这一步，就退出循环了
+    //    //因此用i < K来判断K大于节点个数的情况
+	//	for(;i < k;i++)//使快指针先走k步
+	//	{
+	//		if(fast == NULL)//说明此时k大于等于链表的长度
+	//		{
+	//			break;
+	//		}
+	//		fast = fast->next;
+	//	}
+	//	if(i < k)//如果k大于链表的长度
+	//	{
+	//		return NULL;
+	//	}
+	//	while(fast != NULL)//再使快慢指针同时走，一次走一步，直到快指针走向结尾
+	//	{
+	//		fast = fast->next;
+	//		slow = slow->next;
+	//	}
+	//	return slow;
+	//}
 
 //删除倒数第k个节点
 void LinkListEraseLastKNode(LinkListNode** phead,int k)
