@@ -3,6 +3,7 @@
 #include"search_tree.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 //初始化二叉搜索树
 void SearchTreeInit(SearchTreeNode** proot)
@@ -592,6 +593,60 @@ void SearchTreeInsertByLoop(SearchTreeNode** proot,SearchTreeType value)
     }
     return;
 }
+//在二叉搜索树中插入指定元素（非递归）
+void SearchTreeInsertByLoop1(SearchTreeNode** proot,SearchTreeType value)
+{
+    if(proot == NULL)
+    {
+        //非法输入
+        return;
+    }
+    SearchTreeNode* new_node = CreateNode(value);
+    if(*proot == NULL)
+    {
+        //空树
+        *proot = new_node;
+        return;
+    }
+
+    //如果不是空树，则循环查找要插入的位置
+    SearchTreeNode* pre = NULL;
+    SearchTreeNode* cur = *proot;
+
+    while(1)
+    {
+        if(cur == NULL)
+        {
+            //此时，找到要插入的位置
+            break;
+        }
+        if(value < cur->data)
+        {
+            pre = cur;
+            cur = cur->lchild;
+        }
+        else if(value > cur->data)
+        {
+            pre = cur;
+            cur = cur->rchild;
+        }
+        else 
+        {
+            DestroyNode(new_node);
+            return;
+        }
+    }
+
+    if(value < pre->data)
+    {
+        pre->lchild = new_node;
+    }
+    else
+    {
+        pre->rchild = new_node;
+    }
+    return;
+}
 //在二叉搜索树中查找指定元素（非递归）
 SearchTreeNode* SearchTreeFindByLoop(SearchTreeNode* root,SearchTreeType to_find)
 {
@@ -656,6 +711,229 @@ int SearchNumInArray(SearchTreeType array[],size_t size,SearchTreeType to_find)
         return 1;
     }
 }
+
+//根据二叉搜索树的遍历结果对数组进行赋值
+void Copy(SearchTreeNode* root,SearchTreeType array[],int* index,size_t size)
+{
+    if(root == NULL)
+    {
+        //空树
+        return;
+    }
+    if(array == NULL || index == NULL)
+    {
+        return;
+    }
+    if(*index >= size)
+    {
+        return;
+    }
+    array[*index] = root->data;
+    (*index)++;
+    Copy(root->lchild,array,index,size);
+    //(*index)++;
+    Copy(root->rchild,array,index,size);
+    return;
+
+}
+
+//给定一个数组，对数组元素进行去重
+void DeleteRepeat(SearchTreeType array[],size_t size)
+{
+    if(array == NULL || size == 0)
+    {
+        //非法输入
+        return;
+    }
+    //1. 先根据数组元素创建一棵二叉搜索树
+    SearchTreeNode* root;
+    SearchTreeInit(&root);//初始化二叉搜索树
+
+    size_t index = 0;
+    for(;index < size;++index)
+    {
+        SearchTreeInsert(&root,array[index]);
+    }
+
+    //2. 将数组元素清空后，先序遍历二叉搜索树对数组进行赋值
+    memset(array,0,size*sizeof(SearchTreeType));
+    index = 0;
+    Copy(root,array,&index,size);
+    return;
+}
+
+//将一个二叉搜索树转化为双向链表
+//因为二叉搜索树的中序遍历结果与排序后的双向链表顺序相同
+//所以采取中序来遍历二叉树
+//所以，首先将树的左子树转化为排序双向链表
+//将根节点的左子树指向排好序的左子树的尾节点
+//然后将尾节点更新为根节点
+//将根节点的右子树也进行双向链表的排序
+
+void _Consert(SearchTreeNode* root,SearchTreeNode** tail)
+{
+    if(root == NULL)
+    {
+        return;
+    }
+    //首先对左子树进行排序
+    _Consert(root->lchild,tail);
+    //然后将根节点的左子树置为已排序链表的尾节点
+    root->lchild = *tail;
+    //如果尾节点不为空，则将尾节点的右子树置为根结点
+    if(*tail != NULL)
+    {
+        (*tail)->rchild= root;
+    }
+    //然后将尾节点的值更新为根节点
+    *tail = root;
+    //然后对右子树进行排序
+    _Consert(root->rchild,tail);
+}
+
+SearchTreeNode* Convert(SearchTreeNode* pRootOfTree)
+{
+    if(pRootOfTree == NULL)
+    {
+        return NULL;
+    }
+    //寻找最左下方的结点，作为双向链表的头结点
+    SearchTreeNode* cur = pRootOfTree;
+    while(cur->lchild != NULL)
+    {
+        cur = cur->lchild;
+    }
+    //设置一个尾节点
+    SearchTreeNode* tail = NULL;
+    //对整个二叉树进行排序
+    _Consert(pRootOfTree,&tail);
+    //排序后返回双向链表的头结点
+    return cur;
+}
+//SearchTreeNode* Convert(SearchTreeNode* pRootOfTree)
+//{
+//    //如果二叉搜索树为空
+//    if(pRootOfTree == NULL)
+//    {
+//        return NULL;
+//    }
+//
+//    //定义一个链表的头指针
+//    SearchTreeNode* new_head;
+//    SearchTreeNode* new_tail;
+//    while(pRootOfTree != NULL)
+//    {
+//        //找到最左下方的结点
+//        SearchTreeNode* parent = NULL;
+//        SearchTreeNode* child = pRootOfTree;
+//        while(child->lchild != NULL)
+//        {
+//            parent = child;
+//            child = child->lchild;
+//        }
+//
+//        //如果该结点是根节点
+//        if(parent == NULL)
+//        {
+//            pRootOfTree = child->rchild;
+//        }
+//        //如果不是根节点
+//        else
+//        {
+//            //如果该结点的左右子树均为空
+//            if(child->rchild == NULL)
+//            {
+//                parent->lchild = NULL;
+//            }
+//            else//该结点的右子树不为空
+//            {
+//                parent->lchild = child->rchild;
+//            }
+//        }
+//        //将结点插入到链表中
+//        if(new_head == NULL)
+//        {
+//            child->lchild = child;
+//            child->rchild = child;
+//
+//            new_head = new_tail = child;
+//       //     new_head->lchild = new_tail;
+//       //     new_tail->rchild = new_head;
+//
+//       //     new_head->rchild = new_tail;
+//       //     new_tail->lchild = new_head;
+//        }
+//        else
+//        {
+//            new_tail->lchild = child;
+//            child->rchild = new_tail;
+//
+//            child->lchild = new_head;
+//            new_head->rchild = child;
+//
+//            new_tail = new_tail->lchild;
+//        }
+//    }//end of while(pRootOfTree != NULL)
+//    return new_head;
+//}//end of func
+//
+
+//将一个排序链表转化为高度平衡的二叉搜索树
+void _sortedListToBST(LinkListNode* head,int begin,int end,SearchTreeNode** root)
+{
+    if((end - begin) == 0)
+    {
+        *root = NULL;
+        return;
+
+    }
+    //SearchTreeNode* root;
+    if((end - begin) == 1)
+    {
+        (*root)->lchild = NULL;
+        (*root)->rchild = NULL;
+        (*root)->data = head->data;
+        return;
+    }
+    int mid = begin + (end - begin)/2;
+
+    LinkListNode* cur = head;
+    int index = begin;
+    for(;index < mid;index++)
+    {
+        cur = cur->next;
+    }
+    printf("%c\n",cur->data);
+    printf("%p\n",*root);
+    //printf("%d\n",(*root)->data);
+    (*root)->data = cur->data;
+    //(*root)->left = _sortedListToBST(head,begin,mid,root);
+    _sortedListToBST(head,begin,mid,&((*root)->lchild));
+    _sortedListToBST(cur->next,mid + 1,end,&((*root)->rchild));
+    //(*root)->right = _sortedListToBST(cur->next,mid + 1,end,root);
+    return;
+}
+
+
+SearchTreeNode *sortedListToBST(LinkListNode *head)
+{
+    int length = 0;
+    LinkListNode* cur = head;
+    //统计链表的结点个数
+    while(cur != NULL)
+    {
+        length++;
+        cur = cur->next;
+    }
+    int begin = 0;
+    int end = length;
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+    root = (SearchTreeNode*)0x456788;
+    _sortedListToBST(head,begin,end,&root);
+    return root;
+}
+
 //////////////////////////
 //测试代码
 //////////////////////////
@@ -1017,6 +1295,90 @@ void TestFindInArray()
 
 }
 
+//测试对数组元素去重
+void TestDeleteRepeat()
+{
+    TEST_HANDLE;
+    SearchTreeType array[] = {'s','d','f','y','e'};
+    
+
+    DeleteRepeat(NULL,0);//测试非法输入
+
+    size_t size = sizeof(array)/sizeof(array[0]);
+    DeleteRepeat(array,size);//测试没有重复元素的数组去重
+    size_t size_new = sizeof(array)/sizeof(array[0]);
+    int index = 0;
+    for(;index < size_new;++index)
+    {
+        printf("%c ",array[index]);
+    }
+    printf("\n");
+
+    SearchTreeType array1[] = {'d','f','e','d','r'};
+    size_t size1 = sizeof(array1)/sizeof(array1[0]);
+    DeleteRepeat(array1,size1);//测试没有重复元素的数组去重
+    size_t size1_new = sizeof(array1)/sizeof(array1[0]);
+    index = 0;
+    for(;index < size1_new;++index)
+    {
+        printf("%c ",array1[index]);
+    }
+    printf("\n");
+
+
+}
+void PrintDoubleList(SearchTreeNode* head,const char* msg)
+{
+    printf("%s\n",msg);
+    SearchTreeNode* cur = head;
+    while(cur != NULL)
+    {
+        printf("%c ",cur->data);
+        cur = cur->rchild;
+    }
+    printf("\n");
+    return;
+}
+//测试将搜索二叉树转换为一个双向链表
+void TestConvert()
+{
+    TEST_HANDLE;
+    SearchTreeNode* root;
+    SearchTreeInit(&root);
+    SearchTreeInsertByLoop(&root,'a');//测试在空树中插入节点
+    SearchTreeInsertByLoop(&root,'b');
+    SearchTreeInsertByLoop(&root,'c');
+    SearchTreeInsertByLoop(&root,'f');
+    SearchTreeInsertByLoop(&root,'d');
+    SearchTreeInsertByLoop(&root,'g');
+    SearchTreeInsertByLoop(&root,'h');//测试插入已有的值
+
+    SearchTreeNode* new_head = Convert(root);
+
+    PrintDoubleList(new_head,"打印转化后的双向链表");
+}
+
+//测试将一个排序的单链表转化为一棵高度平衡的二叉搜索树
+void TestsortedListToBST()
+{
+    TEST_HANDLE;
+    LinkListNode* root;
+    LinkListInit(&root);
+
+
+    LinkListPushBack(&root,'a');
+    LinkListPushBack(&root,'b');
+    LinkListPushBack(&root,'c');
+    LinkListPushBack(&root,'d');
+    LinkListPushBack(&root,'e');
+    LinkListPushBack(&root,'f');
+    LinkListPushBack(&root,'g');
+
+    SearchTreeNode* ret = sortedListToBST(root);
+    SearchTreePrint(ret,"打印搜索二叉树的先序和中序遍历");
+    return;
+}
+
 int main()
 {
     TestInit();
@@ -1027,5 +1389,8 @@ int main()
     TestInsertByLoop();
     TestFindByLoop();
     TestFindInArray();
+    TestDeleteRepeat();
+    TestConvert();
+    //TestsortedListToBST();
     return 0;
 }
